@@ -1,0 +1,15 @@
+asgiref==3.11.0
+charset-normalizer==3.4.4
+django==4.2.26
+et-xmlfile==2.0.0
+gunicorn==23.0.0
+mysqlclient==2.2.7
+openpyxl==3.1.5
+packaging==25.0
+pillow==11.3.0
+python-decouple==3.8
+reportlab==4.4.5
+sqlparse==0.5.3
+typing-extensions==4.15.0
+tzdata==2025.2
+whitenoise==6.11.0
