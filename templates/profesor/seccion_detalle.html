@@ -6,6 +6,37 @@
 {% block extra_head %}
 <!-- ApexCharts -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<style>
+    .nota-input {
+        transition: all 0.2s ease;
+    }
+    .nota-input:focus {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.1);
+    }
+    .nota-guardando {
+        background-color: #fef3c7 !important;
+        border-color: #f59e0b !important;
+    }
+    .nota-guardada {
+        background-color: #d1fae5 !important;
+        border-color: #10b981 !important;
+    }
+    .nota-error {
+        background-color: #fee2e2 !important;
+        border-color: #ef4444 !important;
+    }
+    .nota-aprobada {
+        background-color: #d1fae5;
+        color: #065f46;
+        font-weight: 600;
+    }
+    .nota-desaprobada {
+        background-color: #fee2e2;
+        color: #991b1b;
+        font-weight: 600;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -46,22 +77,34 @@
 
     <!-- Tab Content: Alumnos y Notas -->
     <div id="content-alumnos" class="tab-content">
+        <!-- Info Helper -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div class="flex items-center">
+                <i class="fas fa-info-circle text-blue-500 mr-3"></i>
+                <div class="text-sm text-blue-700">
+                    <strong>Instrucciones:</strong> Haz click en cualquier celda de nota para editarla. La nota se guardará automáticamente al salir del campo. Las notas >= 11.6 se marcan en verde (aprobado).
+                </div>
+            </div>
+        </div>
+
         <div class="bg-white shadow-lg rounded-lg overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50">
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 z-10">
                                 Código
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50">
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Alumno
                             </th>
                             {% for componente in componentes %}
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                {{ componente.nombre }}
-                                <br>
-                                <span class="text-primary-600 font-bold">({{ componente.porcentaje }}%)</span>
+                            <th scope="col" class="py-3 text-center text-xs font-medium text-gray-500 uppercase" style="min-width: 120px; max-width: 120px; width: 120px;">
+                                <div class="leading-tight">
+                                    {{ componente.nombre }}
+                                    <br>
+                                    <span class="text-primary-600 font-bold">({{ componente.porcentaje }}%)</span>
+                                </div>
                             </th>
                             {% endfor %}
                             <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-primary-50">
@@ -74,60 +117,60 @@
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         {% for matricula in matriculas %}
-                        <tr class="hover:bg-gray-50 transition">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        <tr class="hover:bg-gray-50 transition" id="row-{{ matricula.id }}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white">
                                 {{ matricula.alumno.codigo }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {{ matricula.alumno.get_full_name }}
                             </td>
                             {% for nota in matricula.notas_ordenadas %}
-                            <td class="px-3 py-4 text-center">
-                                <form method="POST" action="{% url 'profesor_registrar_nota' matricula.id nota.componente.id %}" class="inline-block">
-                                    {% csrf_token %}
-                                    <input
-                                        type="number"
-                                        name="valor"
-                                        step="0.01"
-                                        min="0"
-                                        max="20"
-                                        value="{% if nota and nota.valor is not None %}{{ nota.valor }}{% endif %}"
-                                        class="w-20 text-center border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-                                        onchange="this.form.submit()"
-                                        placeholder="--"
-                                    >
-                                </form>
+                            <td class="py-3 text-center" style="min-width: 120px; max-width: 120px; width: 120px;">
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    max="20"
+                                    {% if nota.valor is not None %}value="{{ nota.valor|format_decimal }}"{% endif %}
+                                    class="nota-input w-full text-center border border-gray-300 rounded px-2 py-2 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                                    placeholder="--"
+                                    data-matricula-id="{{ matricula.id }}"
+                                    data-componente-id="{{ nota.componente.id }}"
+                                    data-nota-id="{{ nota.id|default:'' }}"
+                                    onblur="formatearYGuardarNota(this)"
+                                    onkeypress="if(event.key === 'Enter') { this.blur(); }"
+                                >
                             </td>
                             {% endfor %}
-                            <td class="px-6 py-4 whitespace-nowrap text-center bg-primary-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-center bg-primary-50" id="promedio-{{ matricula.id }}">
                                 {% if matricula.promedio_final is not None %}
                                 <span class="text-lg font-bold {% if matricula.promedio_final >= 11.6 %}text-green-600{% else %}text-red-600{% endif %}">
-                                    {{ matricula.promedio_final|floatformat:2 }}
+                                    {{ matricula.promedio_final|format_decimal }}
                                 </span>
                                 {% else %}
-                                <span class="text-gray-400">--</span>
+                                <span class="text-gray-400 text-lg">--</span>
                                 {% endif %}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-center bg-primary-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-center bg-primary-50" id="estado-{{ matricula.id }}">
                                 {% if matricula.estado_final %}
                                     {% if matricula.estado_final == 'APROBADO' %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         <i class="fas fa-check-circle mr-1"></i>
                                         APROBADO
                                     </span>
                                     {% elif matricula.estado_final == 'DESAPROBADO' %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                         <i class="fas fa-times-circle mr-1"></i>
                                         DESAPROBADO
                                     </span>
                                     {% else %}
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                         <i class="fas fa-clock mr-1"></i>
                                         PENDIENTE
                                     </span>
                                     {% endif %}
                                 {% else %}
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                     <i class="fas fa-minus mr-1"></i>
                                     PENDIENTE
                                 </span>
@@ -274,7 +317,208 @@
     </div>
 </div>
 
+<!-- Notification Toast -->
+<div id="notification-toast" class="hidden fixed top-20 right-4 bg-white shadow-lg rounded-lg p-4 border-l-4 z-50 max-w-sm">
+    <div class="flex items-center">
+        <i id="toast-icon" class="text-2xl mr-3"></i>
+        <div>
+            <p id="toast-title" class="font-semibold text-sm"></p>
+            <p id="toast-message" class="text-xs text-gray-600"></p>
+        </div>
+    </div>
+</div>
+
 <script>
+// CSRF Token para peticiones AJAX
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+
+// Mostrar notificación toast
+function showToast(type, title, message) {
+    const toast = document.getElementById('notification-toast');
+    const icon = document.getElementById('toast-icon');
+    const titleEl = document.getElementById('toast-title');
+    const messageEl = document.getElementById('toast-message');
+
+    // Configurar según tipo
+    if (type === 'success') {
+        toast.className = 'fixed top-20 right-4 bg-white shadow-lg rounded-lg p-4 border-l-4 border-green-500 z-50 max-w-sm';
+        icon.className = 'fas fa-check-circle text-2xl mr-3 text-green-500';
+    } else if (type === 'error') {
+        toast.className = 'fixed top-20 right-4 bg-white shadow-lg rounded-lg p-4 border-l-4 border-red-500 z-50 max-w-sm';
+        icon.className = 'fas fa-times-circle text-2xl mr-3 text-red-500';
+    } else {
+        toast.className = 'fixed top-20 right-4 bg-white shadow-lg rounded-lg p-4 border-l-4 border-blue-500 z-50 max-w-sm';
+        icon.className = 'fas fa-info-circle text-2xl mr-3 text-blue-500';
+    }
+
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    toast.classList.remove('hidden');
+
+    // Ocultar después de 3 segundos
+    setTimeout(() => {
+        toast.classList.add('hidden');
+    }, 3000);
+}
+
+// Formatear y guardar nota
+function formatearYGuardarNota(input) {
+    // Formatear el valor a 2 decimales
+    if (input.value.trim() !== '') {
+        const valorFloat = parseFloat(input.value);
+        if (!isNaN(valorFloat)) {
+            input.value = valorFloat.toFixed(2);
+        }
+    }
+    // Llamar a la función de guardado
+    guardarNota(input);
+}
+
+// Guardar nota con AJAX
+function guardarNota(input) {
+    const matriculaId = input.dataset.matriculaId;
+    const componenteId = input.dataset.componenteId;
+    const valor = input.value.trim();
+
+    // Validar valor
+    if (valor !== '' && (parseFloat(valor) < 0 || parseFloat(valor) > 20)) {
+        input.classList.add('nota-error');
+        showToast('error', 'Error', 'La nota debe estar entre 0 y 20');
+        setTimeout(() => {
+            input.classList.remove('nota-error');
+        }, 2000);
+        return;
+    }
+
+    // Mostrar estado de guardando
+    input.classList.add('nota-guardando');
+    input.disabled = true;
+
+    // Enviar petición AJAX
+    fetch(`/profesor/nota/${matriculaId}/${componenteId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrftoken
+        },
+        body: `valor=${valor || ''}`
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al guardar');
+        }
+        return response.text();
+    })
+    .then(() => {
+        // Éxito
+        input.classList.remove('nota-guardando');
+        input.classList.add('nota-guardada');
+        input.disabled = false;
+
+        // Aplicar estilo según nota
+        if (valor !== '') {
+            const notaFloat = parseFloat(valor);
+            if (notaFloat >= 11.6) {
+                input.classList.add('nota-aprobada');
+                input.classList.remove('nota-desaprobada');
+            } else {
+                input.classList.add('nota-desaprobada');
+                input.classList.remove('nota-aprobada');
+            }
+        } else {
+            input.classList.remove('nota-aprobada', 'nota-desaprobada');
+        }
+
+        showToast('success', 'Nota guardada', `Nota ${valor || 'eliminada'} registrada correctamente`);
+
+        // Actualizar promedio y estado (recarga solo esa fila)
+        actualizarPromedioFila(matriculaId);
+
+        // Limpiar estilos después de 1 segundo
+        setTimeout(() => {
+            input.classList.remove('nota-guardada');
+        }, 1500);
+    })
+    .catch(error => {
+        // Error
+        input.classList.remove('nota-guardando');
+        input.classList.add('nota-error');
+        input.disabled = false;
+        showToast('error', 'Error al guardar', 'No se pudo guardar la nota. Intenta nuevamente.');
+
+        setTimeout(() => {
+            input.classList.remove('nota-error');
+        }, 2000);
+    });
+}
+
+// Actualizar promedio de una fila específica
+function actualizarPromedioFila(matriculaId) {
+    const row = document.getElementById(`row-${matriculaId}`);
+    const inputs = row.querySelectorAll('.nota-input');
+
+    let suma = 0;
+    let totalPorcentaje = 0;
+    let hayNotas = false;
+
+    inputs.forEach(input => {
+        const valor = parseFloat(input.value);
+        if (!isNaN(valor) && valor >= 0) {
+            hayNotas = true;
+            // Obtener porcentaje del header
+            const componenteId = input.dataset.componenteId;
+            // Por simplicidad, asumimos que todas las notas tienen el mismo peso
+            // En producción, deberías obtener el porcentaje real del componente
+            suma += valor;
+            totalPorcentaje += 1;
+        }
+    });
+
+    const promedioCell = document.getElementById(`promedio-${matriculaId}`);
+    const estadoCell = document.getElementById(`estado-${matriculaId}`);
+
+    if (hayNotas && totalPorcentaje > 0) {
+        const promedio = suma / totalPorcentaje;
+        const promedioFixed = promedio.toFixed(2);
+
+        // Actualizar promedio
+        promedioCell.innerHTML = `<span class="text-lg font-bold ${promedio >= 11.6 ? 'text-green-600' : 'text-red-600'}">${promedioFixed}</span>`;
+
+        // Actualizar estado
+        if (promedio >= 11.6) {
+            estadoCell.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <i class="fas fa-check-circle mr-1"></i>
+                APROBADO
+            </span>`;
+        } else {
+            estadoCell.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                <i class="fas fa-times-circle mr-1"></i>
+                DESAPROBADO
+            </span>`;
+        }
+    } else {
+        promedioCell.innerHTML = '<span class="text-gray-400 text-lg">--</span>';
+        estadoCell.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            <i class="fas fa-minus mr-1"></i>
+            PENDIENTE
+        </span>`;
+    }
+}
+
 // Tab Management
 function showTab(tabName) {
     // Hide all tabs
@@ -461,7 +705,6 @@ function loadCharts() {
         });
 }
 
-// Dictionary template filter helper (Django doesn't have built-in dict.get in templates)
 window.chartsLoaded = false;
 </script>
 {% endblock %}

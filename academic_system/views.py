@@ -191,6 +191,9 @@ def profesor_seccion_detalle(request, seccion_id):
         matricula.notas_ordenadas = []
         for componente in componentes:
             nota = notas_dict.get(componente.id)
+            # Si no existe la nota, crear una instancia temporal (sin guardar en BD)
+            if nota is None:
+                nota = Nota(matricula=matricula, componente=componente, valor=None)
             matricula.notas_ordenadas.append(nota)
 
         # Calcular promedio
@@ -218,13 +221,29 @@ def profesor_registrar_nota(request, matricula_id, componente_id):
             else:
                 valor = None
 
-            NotaService.registrar_nota(matricula_id, componente_id, valor)
+            nota = NotaService.registrar_nota(matricula_id, componente_id, valor)
+
+            # Si es petición AJAX, devolver JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/x-www-form-urlencoded':
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Nota registrada exitosamente',
+                    'valor': str(nota.valor) if nota.valor is not None else None
+                })
+
             messages.success(request, 'Nota registrada exitosamente.')
 
         except Exception as e:
+            # Si es petición AJAX, devolver error JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/x-www-form-urlencoded':
+                return JsonResponse({
+                    'success': False,
+                    'message': str(e)
+                }, status=400)
+
             messages.error(request, f'Error al registrar nota: {str(e)}')
 
-    # Redirigir de vuelta a la sección
+    # Redirigir de vuelta a la sección (solo si no es AJAX)
     matricula = get_object_or_404(Matricula, pk=matricula_id)
     return redirect('profesor_seccion_detalle', seccion_id=matricula.seccion.id)
 
