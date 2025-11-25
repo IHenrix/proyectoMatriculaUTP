@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Alumno{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Mi Panel de Estudiante</h1>
+        <p class="mt-2 text-sm text-gray-600">Bienvenido, {{ user.get_full_name }}</p>
+    </div>
+
+    <!-- Ciclo Activo Info -->
+    {% if ciclo_activo %}
+    <div class="bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg shadow-lg p-6 mb-8 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold">{{ ciclo_activo.nombre }}</h2>
+                <p class="text-primary-100 mt-2">
+                    <i class="fas fa-calendar mr-2"></i>
+                    Matrícula: {{ ciclo_activo.fecha_inicio_matricula|date:"d/m/Y" }} - {{ ciclo_activo.fecha_fin_matricula|date:"d/m/Y" }}
+                </p>
+            </div>
+            <div class="text-right">
+                {% if ciclo_activo.puede_matricularse %}
+                <span class="inline-flex items-center px-4 py-2 bg-green-500 rounded-full text-sm font-medium">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Matrícula Abierta
+                </span>
+                {% else %}
+                <span class="inline-flex items-center px-4 py-2 bg-yellow-500 rounded-full text-sm font-medium">
+                    <i class="fas fa-lock mr-2"></i>
+                    Matrícula Cerrada
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-3 mb-8">
+        <!-- Cursos Matriculados -->
+        <div class="bg-white overflow-hidden shadow-lg rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-book text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Cursos Matriculados</dt>
+                            <dd class="text-2xl font-bold text-gray-900">{{ matriculas|length }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Créditos Totales -->
+        <div class="bg-white overflow-hidden shadow-lg rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-star text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Créditos Totales</dt>
+                            <dd class="text-2xl font-bold text-gray-900">{{ creditos_totales }}</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado -->
+        <div class="bg-white overflow-hidden shadow-lg rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="h-12 w-12 bg-primary-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user-graduate text-primary-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Estado</dt>
+                            <dd class="text-lg font-bold text-green-600">Activo</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-8">
+        <!-- Matricularse -->
+        <a href="{% url 'alumno_matricula' %}" class="block bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-clipboard-check text-4xl text-primary-600"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-medium text-gray-900">Matricularme</h3>
+                    <p class="text-sm text-gray-500 mt-1">
+                        {% if ciclo_activo.puede_matricularse %}
+                        Ver secciones disponibles y matricularte
+                        {% else %}
+                        Periodo de matrícula cerrado
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </a>
+
+        <!-- Ver Mis Cursos -->
+        <a href="{% url 'alumno_mis_cursos' %}" class="block bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-graduation-cap text-4xl text-blue-600"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-medium text-gray-900">Mis Cursos</h3>
+                    <p class="text-sm text-gray-500 mt-1">Ver cursos matriculados y notas</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Cursos Matriculados -->
+    {% if matriculas %}
+    <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">Mis Cursos - {{ ciclo_activo.nombre }}</h2>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            {% for matricula in matriculas %}
+            <div class="bg-white rounded-lg shadow hover:shadow-lg transition p-5">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900">{{ matricula.seccion.curso.nombre }}</h3>
+                        <p class="text-sm text-gray-500 mt-1">{{ matricula.seccion.codigo }}</p>
+                    </div>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                        {{ matricula.seccion.curso.creditos }} créditos
+                    </span>
+                </div>
+                <div class="mt-4 grid grid-cols-2 gap-3">
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-{{ matricula.seccion.get_modalidad_icon }} text-primary-600 mr-1"></i>
+                        {{ matricula.seccion.get_modalidad_display }}
+                    </div>
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-{{ matricula.seccion.get_turno_icon }} text-primary-600 mr-1"></i>
+                        {{ matricula.seccion.get_turno_display }}
+                    </div>
+                </div>
+                {% if matricula.seccion.horario %}
+                <div class="mt-3 text-sm text-gray-600 bg-gray-50 rounded p-2">
+                    <i class="fas fa-clock text-gray-400 mr-1"></i>
+                    {{ matricula.seccion.horario }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-lg shadow-lg p-12 text-center">
+        <div class="text-gray-400">
+            <i class="fas fa-book-open text-6xl mb-4"></i>
+            <h3 class="text-xl font-medium text-gray-900 mb-2">No estás matriculado en ningún curso</h3>
+            <p class="text-gray-500 mb-4">
+                {% if ciclo_activo.puede_matricularse %}
+                El periodo de matrícula está abierto. Matricúlate ahora en las secciones disponibles.
+                {% else %}
+                Espera a que se abra el periodo de matrícula para inscribirte en cursos.
+                {% endif %}
+            </p>
+            {% if ciclo_activo.puede_matricularse %}
+            <a href="{% url 'alumno_matricula' %}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
+                <i class="fas fa-clipboard-check mr-2"></i>
+                Ir a Matrícula
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% else %}
+    <!-- Sin ciclo activo -->
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-yellow-400 text-2xl"></i>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-lg font-medium text-yellow-900">No hay ciclos activos</h3>
+                <p class="mt-2 text-sm text-yellow-700">
+                    Actualmente no hay ningún ciclo académico activo. Contacta al administrador para más información.
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-gray-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - {{ UNIVERSITY_NAME }}</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            600: '#DC143C',
+                            700: '#be123c',
+                            800: '#9f1239',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="h-full">
+    <div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md">
+            <!-- Logo/Título -->
+            <div class="text-center">
+                <div class="mx-auto h-16 w-16 bg-primary-600 rounded-full flex items-center justify-center shadow-lg">
+                    <i class="fas fa-graduation-cap text-white text-3xl"></i>
+                </div>
+                <h2 class="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
+                    {{ UNIVERSITY_NAME }}
+                </h2>
+                <p class="mt-2 text-center text-sm text-gray-600">
+                    Sistema de Matrículas y Notas
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="bg-white py-8 px-4 shadow-xl sm:rounded-lg sm:px-10 border border-gray-100">
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="rounded-md p-4 mb-4 {% if message.tags == 'error' %}bg-red-50 border border-red-200{% else %}bg-blue-50 border border-blue-200{% endif %}">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                {% if message.tags == 'error' %}
+                                <i class="fas fa-times-circle text-red-400"></i>
+                                {% else %}
+                                <i class="fas fa-info-circle text-blue-400"></i>
+                                {% endif %}
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm {% if message.tags == 'error' %}text-red-800{% else %}text-blue-800{% endif %}">
+                                    {{ message }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form class="space-y-6" method="POST" action="{% url 'login' %}">
+                    {% csrf_token %}
+
+                    <!-- Usuario -->
+                    <div>
+                        <label for="username" class="block text-sm font-medium leading-6 text-gray-900">
+                            <i class="fas fa-user mr-1 text-primary-600"></i>
+                            Usuario / Código
+                        </label>
+                        <div class="mt-2">
+                            <input
+                                id="username"
+                                name="username"
+                                type="text"
+                                autocomplete="username"
+                                required
+                                class="block w-full rounded-md border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6 transition"
+                                placeholder="Ingresa tu código de usuario"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium leading-6 text-gray-900">
+                            <i class="fas fa-lock mr-1 text-primary-600"></i>
+                            Contraseña
+                        </label>
+                        <div class="mt-2">
+                            <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                autocomplete="current-password"
+                                required
+                                class="block w-full rounded-md border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6 transition"
+                                placeholder="Ingresa tu contraseña"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Botón de login -->
+                    <div>
+                        <button
+                            type="submit"
+                            class="flex w-full justify-center rounded-md bg-primary-600 px-3 py-2.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition duration-200 transform hover:scale-[1.02]"
+                        >
+                            <i class="fas fa-sign-in-alt mr-2"></i>
+                            Iniciar Sesión
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Info adicional -->
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="bg-white px-2 text-gray-500">
+                                <i class="fas fa-info-circle"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-center text-xs text-gray-500">
+                        <p class="mb-2">
+                            <i class="fas fa-user-shield mr-1"></i>
+                            <strong>Admin:</strong> 75911772 / Pedro1415@
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-chalkboard-teacher mr-1"></i>
+                            <strong>Profesor:</strong> U14287809 / Pedro1415@
+                        </p>
+                        <p>
+                            <i class="fas fa-user-graduate mr-1"></i>
+                            <strong>Alumno:</strong> U79312551 / Pedro1415@
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <p class="mt-6 text-center text-xs text-gray-500">
+                © 2025 {{ UNIVERSITY_NAME }}
+                <br>
+                <span class="text-gray-400">Sistema desarrollado con Patrones de Diseño</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Auto-focus en el campo de usuario
+        document.getElementById('username').focus();
+    </script>
+</body>
+</html>

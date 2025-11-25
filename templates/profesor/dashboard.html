@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Profesor{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Mis Secciones</h1>
+        <p class="mt-2 text-sm text-gray-600">Gestiona las secciones asignadas, registra notas y visualiza estadísticas</p>
+    </div>
+
+    {% if secciones %}
+    <!-- Grid de Secciones -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        {% for seccion in secciones %}
+        <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
+            <!-- Header de la tarjeta -->
+            <div class="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold text-white">{{ seccion.curso.nombre }}</h2>
+                        <p class="text-primary-100 text-sm mt-1">{{ seccion.codigo }}</p>
+                    </div>
+                    <div class="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-book-open text-white text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido de la tarjeta -->
+            <div class="px-6 py-4">
+                <!-- Información del curso -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-calendar-alt text-primary-600 mr-2"></i>
+                        <span>{{ seccion.ciclo.nombre }}</span>
+                    </div>
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-star text-yellow-500 mr-2"></i>
+                        <span>{{ seccion.curso.creditos }} créditos</span>
+                    </div>
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-{{ seccion.get_modalidad_icon }} text-blue-600 mr-2"></i>
+                        <span>{{ seccion.get_modalidad_display }}</span>
+                    </div>
+                    <div class="flex items-center text-sm text-gray-600">
+                        <i class="fas fa-{{ seccion.get_turno_icon }} text-purple-600 mr-2"></i>
+                        <span>{{ seccion.get_turno_display }}</span>
+                    </div>
+                </div>
+
+                <!-- Estadísticas -->
+                <div class="grid grid-cols-3 gap-3 mb-4 pt-4 border-t border-gray-200">
+                    <div class="text-center">
+                        <p class="text-2xl font-bold text-primary-600">{{ seccion.matriculas.count }}</p>
+                        <p class="text-xs text-gray-500">Alumnos</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-bold text-green-600">{{ seccion.vacantes_disponibles }}</p>
+                        <p class="text-xs text-gray-500">Vacantes</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-bold text-blue-600">{{ seccion.vacantes_totales }}</p>
+                        <p class="text-xs text-gray-500">Capacidad</p>
+                    </div>
+                </div>
+
+                <!-- Horario -->
+                {% if seccion.horario %}
+                <div class="bg-gray-50 rounded-md p-3 mb-4">
+                    <p class="text-xs text-gray-500 mb-1">
+                        <i class="fas fa-clock text-gray-400 mr-1"></i>
+                        Horario
+                    </p>
+                    <p class="text-sm text-gray-700 font-medium">{{ seccion.horario }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Botón de acción -->
+                <a href="{% url 'profesor_seccion_detalle' seccion.id %}" class="block w-full text-center px-4 py-2.5 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition font-medium shadow-sm hover:shadow">
+                    <i class="fas fa-clipboard-list mr-2"></i>
+                    Ver Sección Completa
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Estado vacío -->
+    <div class="bg-white rounded-lg shadow-lg p-12 text-center">
+        <div class="text-gray-400">
+            <i class="fas fa-chalkboard text-6xl mb-4"></i>
+            <h3 class="text-xl font-medium text-gray-900 mb-2">No tienes secciones asignadas</h3>
+            <p class="text-gray-500">Contacta al administrador para que te asigne secciones</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Información adicional -->
+    <div class="mt-8 bg-gradient-to-r from-blue-50 to-white border border-blue-200 rounded-lg p-6">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-info-circle text-blue-500 text-2xl"></i>
+            </div>
+            <div class="ml-4">
+                <h3 class="text-lg font-medium text-gray-900">Información para Profesores</h3>
+                <ul class="mt-2 text-sm text-gray-600 space-y-1">
+                    <li><i class="fas fa-check text-green-600 mr-2"></i>Registra y actualiza notas de tus alumnos</li>
+                    <li><i class="fas fa-check text-green-600 mr-2"></i>Visualiza estadísticas y gráficos de rendimiento</li>
+                    <li><i class="fas fa-check text-green-600 mr-2"></i>Exporta listas de alumnos y reportes de notas en Excel y PDF</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Agregar iconos dinámicos según modalidad y turno
+document.addEventListener('DOMContentLoaded', function() {
+    // Los iconos se manejan desde el backend con métodos del modelo
+});
+</script>
+{% endblock %}

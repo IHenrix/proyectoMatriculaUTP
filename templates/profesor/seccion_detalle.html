@@ -1,0 +1,467 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}{{ seccion.curso.nombre }} - {{ seccion.codigo }}{% endblock %}
+
+{% block extra_head %}
+<!-- ApexCharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <!-- Header con información de la sección -->
+    <div class="bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg shadow-lg p-6 mb-8 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold">{{ seccion.curso.nombre }}</h1>
+                <p class="text-primary-100 mt-2">{{ seccion.codigo }} • {{ seccion.ciclo.nombre }} • {{ seccion.get_modalidad_display }}</p>
+            </div>
+            <div class="text-right">
+                <p class="text-4xl font-bold">{{ matriculas|length }}</p>
+                <p class="text-primary-100 text-sm">Alumnos Matriculados</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mb-6">
+        <div class="border-b border-gray-200">
+            <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                <button onclick="showTab('alumnos')" id="tab-alumnos" class="tab-button border-primary-500 text-primary-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-users mr-2"></i>
+                    Alumnos y Notas
+                </button>
+                <button onclick="showTab('estadisticas')" id="tab-estadisticas" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-chart-bar mr-2"></i>
+                    Estadísticas
+                </button>
+                <button onclick="showTab('exportar')" id="tab-exportar" class="tab-button border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                    <i class="fas fa-file-download mr-2"></i>
+                    Exportar
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Tab Content: Alumnos y Notas -->
+    <div id="content-alumnos" class="tab-content">
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50">
+                                Código
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50">
+                                Alumno
+                            </th>
+                            {% for componente in componentes %}
+                            <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                {{ componente.nombre }}
+                                <br>
+                                <span class="text-primary-600 font-bold">({{ componente.porcentaje }}%)</span>
+                            </th>
+                            {% endfor %}
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-primary-50">
+                                Promedio Final
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-primary-50">
+                                Estado
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for matricula in matriculas %}
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ matricula.alumno.codigo }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ matricula.alumno.get_full_name }}
+                            </td>
+                            {% for nota in matricula.notas_ordenadas %}
+                            <td class="px-3 py-4 text-center">
+                                <form method="POST" action="{% url 'profesor_registrar_nota' matricula.id nota.componente.id %}" class="inline-block">
+                                    {% csrf_token %}
+                                    <input
+                                        type="number"
+                                        name="valor"
+                                        step="0.01"
+                                        min="0"
+                                        max="20"
+                                        value="{% if nota and nota.valor is not None %}{{ nota.valor }}{% endif %}"
+                                        class="w-20 text-center border-gray-300 rounded-md shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                                        onchange="this.form.submit()"
+                                        placeholder="--"
+                                    >
+                                </form>
+                            </td>
+                            {% endfor %}
+                            <td class="px-6 py-4 whitespace-nowrap text-center bg-primary-50">
+                                {% if matricula.promedio_final is not None %}
+                                <span class="text-lg font-bold {% if matricula.promedio_final >= 11.6 %}text-green-600{% else %}text-red-600{% endif %}">
+                                    {{ matricula.promedio_final|floatformat:2 }}
+                                </span>
+                                {% else %}
+                                <span class="text-gray-400">--</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center bg-primary-50">
+                                {% if matricula.estado_final %}
+                                    {% if matricula.estado_final == 'APROBADO' %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        APROBADO
+                                    </span>
+                                    {% elif matricula.estado_final == 'DESAPROBADO' %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <i class="fas fa-times-circle mr-1"></i>
+                                        DESAPROBADO
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        PENDIENTE
+                                    </span>
+                                    {% endif %}
+                                {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    <i class="fas fa-minus mr-1"></i>
+                                    PENDIENTE
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{{ componentes|length|add:4 }}" class="px-6 py-12 text-center">
+                                <div class="text-gray-400">
+                                    <i class="fas fa-user-graduate text-4xl mb-4"></i>
+                                    <p class="text-lg font-medium">No hay alumnos matriculados en esta sección</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Content: Estadísticas -->
+    <div id="content-estadisticas" class="tab-content hidden">
+        <!-- Resumen de Estadísticas -->
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-4 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <p class="text-sm text-gray-500">Total Alumnos</p>
+                <p class="text-3xl font-bold text-gray-900" id="stat-total">--</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <p class="text-sm text-gray-500">Promedio General</p>
+                <p class="text-3xl font-bold text-primary-600" id="stat-promedio">--</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <p class="text-sm text-gray-500">Aprobados</p>
+                <p class="text-3xl font-bold text-green-600" id="stat-aprobados">--</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <p class="text-sm text-gray-500">Desaprobados</p>
+                <p class="text-3xl font-bold text-red-600" id="stat-desaprobados">--</p>
+            </div>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
+            <!-- Gráfico: Distribución de Notas -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-chart-bar text-primary-600 mr-2"></i>
+                    Distribución de Notas
+                </h3>
+                <div id="chart-distribucion"></div>
+            </div>
+
+            <!-- Gráfico: Progreso por Componente -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-chart-line text-blue-600 mr-2"></i>
+                    Promedio por Componente
+                </h3>
+                <div id="chart-progreso"></div>
+            </div>
+        </div>
+
+        <!-- Gráfico: Top Alumnos -->
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-trophy text-yellow-500 mr-2"></i>
+                    Top 5 Mejores Alumnos
+                </h3>
+                <div id="chart-top"></div>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    <i class="fas fa-exclamation-triangle text-orange-500 mr-2"></i>
+                    Alumnos con Bajo Rendimiento
+                </h3>
+                <div id="chart-bajo"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Content: Exportar -->
+    <div id="content-exportar" class="tab-content hidden">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <!-- Exportar Lista de Alumnos -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="text-center mb-4">
+                    <i class="fas fa-users text-5xl text-blue-600 mb-3"></i>
+                    <h3 class="text-xl font-semibold text-gray-900">Lista de Alumnos</h3>
+                    <p class="text-sm text-gray-500 mt-2">Exporta la lista completa de alumnos matriculados</p>
+                </div>
+                <div class="space-y-3">
+                    <a href="{% url 'profesor_exportar_lista_alumnos' seccion.id 'excel' %}" class="block w-full px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-center font-medium">
+                        <i class="fas fa-file-excel mr-2"></i>
+                        Descargar Excel
+                    </a>
+                    <a href="{% url 'profesor_exportar_lista_alumnos' seccion.id 'pdf' %}" class="block w-full px-4 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-center font-medium">
+                        <i class="fas fa-file-pdf mr-2"></i>
+                        Descargar PDF
+                    </a>
+                </div>
+            </div>
+
+            <!-- Exportar Notas -->
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="text-center mb-4">
+                    <i class="fas fa-clipboard-list text-5xl text-primary-600 mb-3"></i>
+                    <h3 class="text-xl font-semibold text-gray-900">Reporte de Notas</h3>
+                    <p class="text-sm text-gray-500 mt-2">Exporta el registro completo de notas y promedios</p>
+                </div>
+                <div class="space-y-3">
+                    <a href="{% url 'profesor_exportar_notas' seccion.id 'excel' %}" class="block w-full px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition text-center font-medium">
+                        <i class="fas fa-file-excel mr-2"></i>
+                        Descargar Excel
+                    </a>
+                    <a href="{% url 'profesor_exportar_notas' seccion.id 'pdf' %}" class="block w-full px-4 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-center font-medium">
+                        <i class="fas fa-file-pdf mr-2"></i>
+                        Descargar PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle text-blue-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-blue-700">
+                        <strong>Formatos disponibles:</strong>
+                    </p>
+                    <ul class="mt-2 text-xs text-blue-600 list-disc list-inside space-y-1">
+                        <li><strong>Excel:</strong> Ideal para análisis adicional y edición de datos</li>
+                        <li><strong>PDF:</strong> Perfecto para impresión y documentación oficial</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Tab Management
+function showTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.add('hidden');
+    });
+
+    // Remove active state from all buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('border-primary-500', 'text-primary-600');
+        button.classList.add('border-transparent', 'text-gray-500');
+    });
+
+    // Show selected tab
+    document.getElementById('content-' + tabName).classList.remove('hidden');
+
+    // Add active state to selected button
+    const activeButton = document.getElementById('tab-' + tabName);
+    activeButton.classList.add('border-primary-500', 'text-primary-600');
+    activeButton.classList.remove('border-transparent', 'text-gray-500');
+
+    // Load charts if estadisticas tab
+    if (tabName === 'estadisticas' && !window.chartsLoaded) {
+        loadCharts();
+        window.chartsLoaded = true;
+    }
+}
+
+// Load ApexCharts
+function loadCharts() {
+    fetch('{% url "api_estadisticas_seccion" seccion.id %}')
+        .then(response => response.json())
+        .then(data => {
+            // Update statistics
+            document.getElementById('stat-total').textContent = data.estadisticas.total_alumnos;
+            document.getElementById('stat-promedio').textContent = data.estadisticas.promedio_general ? data.estadisticas.promedio_general.toFixed(2) : '--';
+            document.getElementById('stat-aprobados').textContent = data.estadisticas.aprobados || 0;
+            document.getElementById('stat-desaprobados').textContent = data.estadisticas.desaprobados || 0;
+
+            // Chart 1: Distribución de Notas
+            const distribucion = data.estadisticas.distribucion_notas;
+            const optionsDistribucion = {
+                series: [{
+                    name: 'Alumnos',
+                    data: Object.values(distribucion)
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 300,
+                    toolbar: { show: false }
+                },
+                colors: ['#DC143C'],
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4,
+                        dataLabels: { position: 'top' }
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    offsetY: -20,
+                    style: {
+                        fontSize: '12px',
+                        colors: ["#304758"]
+                    }
+                },
+                xaxis: {
+                    categories: Object.keys(distribucion),
+                    labels: {
+                        style: { fontSize: '12px' }
+                    }
+                },
+                yaxis: {
+                    title: { text: 'Cantidad de Alumnos' }
+                }
+            };
+            new ApexCharts(document.querySelector("#chart-distribucion"), optionsDistribucion).render();
+
+            // Chart 2: Progreso por Componente
+            const progreso = data.progreso_evaluaciones;
+            const optionsProgreso = {
+                series: [{
+                    name: 'Promedio',
+                    data: progreso.map(item => item.promedio ? item.promedio.toFixed(2) : 0)
+                }],
+                chart: {
+                    type: 'line',
+                    height: 300,
+                    toolbar: { show: false }
+                },
+                colors: ['#2563eb'],
+                stroke: {
+                    curve: 'smooth',
+                    width: 3
+                },
+                markers: {
+                    size: 5
+                },
+                xaxis: {
+                    categories: progreso.map(item => item.componente),
+                    labels: {
+                        style: { fontSize: '11px' }
+                    }
+                },
+                yaxis: {
+                    min: 0,
+                    max: 20,
+                    title: { text: 'Promedio (0-20)' }
+                },
+                grid: {
+                    borderColor: '#f1f1f1'
+                }
+            };
+            new ApexCharts(document.querySelector("#chart-progreso"), optionsProgreso).render();
+
+            // Chart 3: Top Alumnos
+            const topAlumnos = data.top_alumnos;
+            const optionsTop = {
+                series: [{
+                    name: 'Promedio',
+                    data: topAlumnos.map(item => item.promedio ? item.promedio.toFixed(2) : 0)
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 300,
+                    toolbar: { show: false }
+                },
+                colors: ['#10b981'],
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4,
+                        horizontal: true
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function(val) {
+                        return val.toFixed(2);
+                    }
+                },
+                xaxis: {
+                    categories: topAlumnos.map(item => item.nombre),
+                    min: 0,
+                    max: 20
+                }
+            };
+            new ApexCharts(document.querySelector("#chart-top"), optionsTop).render();
+
+            // Chart 4: Bajo Rendimiento
+            const bajoAlumnos = data.peores_alumnos;
+            const optionsBajo = {
+                series: [{
+                    name: 'Promedio',
+                    data: bajoAlumnos.map(item => item.promedio ? item.promedio.toFixed(2) : 0)
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 300,
+                    toolbar: { show: false }
+                },
+                colors: ['#f97316'],
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4,
+                        horizontal: true
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function(val) {
+                        return val.toFixed(2);
+                    }
+                },
+                xaxis: {
+                    categories: bajoAlumnos.map(item => item.nombre),
+                    min: 0,
+                    max: 20
+                }
+            };
+            new ApexCharts(document.querySelector("#chart-bajo"), optionsBajo).render();
+        })
+        .catch(error => {
+            console.error('Error loading charts:', error);
+        });
+}
+
+// Dictionary template filter helper (Django doesn't have built-in dict.get in templates)
+window.chartsLoaded = false;
+</script>
+{% endblock %}

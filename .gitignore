@@ -1,0 +1,104 @@
+# Python
+*.py[cod]
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+*.pyc
+*.pyo
+*.pyd
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+static/
+*.pot
+
+# Base de datos
+*.sql
+*.mysql
+*.db
+
+# Entorno virtual
+venv/
+env/
+ENV/
+.venv
+.virtualenv
+
+# Variables de entorno y configuración sensible
+.env
+.env.local
+.env.production
+*.secret
+
+# IDE y Editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+.code-workspace
+
+# Claude Code
+.claude/
+.claude.json
+.claude.json.backup
+.claude.json.corrupted.*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+*.bak
+*~
+
+# Node modules (para Tailwind CSS)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Archivos de Azure
+.azure/
+
+# Pytest y Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Migraciones locales (opcional - descomentar si no quieres subir migraciones)
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+# Reportes y exportaciones generadas
+*.xlsx
+*.pdf
+reportes/
+
+# Cache de pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Backups
+*.backup
+*.bak
+*.old
