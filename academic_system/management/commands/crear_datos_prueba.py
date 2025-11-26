@@ -62,25 +62,13 @@ class Command(BaseCommand):
                 'password': 'Pedro1415@'
             },
             {
-                'nombre': 'Hernan Francisco',
-                'apellido_paterno': 'Peña',
-                'apellido_materno': 'Carnero',
-                'tipo_documento': 'DNI',
-                'numero_documento': '43745890',
-                'email': 'hernan.pena@utp.edu.pe',
-                'telefono': '987345678',
-                'sexo': 'M',
-                'rol': 'profesor',
-                'password': 'Pedro1415@'
-            },
-            {
                 'nombre': 'Ecmias Eduardo',
                 'apellido_paterno': 'Fernandez',
                 'apellido_materno': 'Galvez',
                 'tipo_documento': 'DNI',
-                'numero_documento': '44856901',
+                'numero_documento': '43745890',
                 'email': 'ecmias.fernandez@utp.edu.pe',
-                'telefono': '987456789',
+                'telefono': '987345678',
                 'sexo': 'M',
                 'rol': 'profesor',
                 'password': 'Pedro1415@'
@@ -90,33 +78,9 @@ class Command(BaseCommand):
                 'apellido_paterno': 'Farfan',
                 'apellido_materno': 'Leyva',
                 'tipo_documento': 'DNI',
-                'numero_documento': '45967012',
+                'numero_documento': '44856901',
                 'email': 'miguel.farfan@utp.edu.pe',
-                'telefono': '987567890',
-                'sexo': 'M',
-                'rol': 'profesor',
-                'password': 'Pedro1415@'
-            },
-            {
-                'nombre': 'Jose Carlos',
-                'apellido_paterno': 'Gallardo',
-                'apellido_materno': 'Montero',
-                'tipo_documento': 'DNI',
-                'numero_documento': '46078123',
-                'email': 'jose.gallardo@utp.edu.pe',
-                'telefono': '987678901',
-                'sexo': 'M',
-                'rol': 'profesor',
-                'password': 'Pedro1415@'
-            },
-            {
-                'nombre': 'Oscar Efrain',
-                'apellido_paterno': 'Capuñay',
-                'apellido_materno': 'Uceda',
-                'tipo_documento': 'DNI',
-                'numero_documento': '47189234',
-                'email': 'oscar.capunay@utp.edu.pe',
-                'telefono': '987789012',
+                'telefono': '987456789',
                 'sexo': 'M',
                 'rol': 'profesor',
                 'password': 'Pedro1415@'
@@ -135,15 +99,15 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING(f'Profesor {profesor.codigo} ya existe'))
 
         alumnos_data = [
-            {'nombre': 'Juan Jose', 'apellido_paterno': 'Morales', 'apellido_materno': 'Velasquez', 'dni': 'U236265087', 'anio': 1998},
-            {'nombre': 'Kelvin Jesus', 'apellido_paterno': 'Acevedo', 'apellido_materno': 'Huarachi', 'dni': 'U2330980', 'anio': 1999},
-            {'nombre': 'Angel', 'apellido_paterno': 'Campusano', 'apellido_materno': 'Solis', 'dni': 'U23317595', 'anio': 1997},
-            {'nombre': 'Joel Anthony', 'apellido_paterno': 'Saldaña', 'apellido_materno': 'Chavez', 'dni': 'U232650077', 'anio': 2000}
+            {'nombre': 'Juan Jose', 'apellido_paterno': 'Morales', 'apellido_materno': 'Velasquez', 'dni': '72365087', 'anio': 1998},
+            {'nombre': 'Kelvin Jesus', 'apellido_paterno': 'Acevedo', 'apellido_materno': 'Huarachi', 'dni': '73309801', 'anio': 1999},
+            {'nombre': 'Angel', 'apellido_paterno': 'Campusano', 'apellido_materno': 'Solis', 'dni': '74317595', 'anio': 1997},
+            {'nombre': 'Joel Anthony', 'apellido_paterno': 'Saldaña', 'apellido_materno': 'Chavez', 'dni': '75650077', 'anio': 2000}
         ]
 
         alumnos = []
         for i, alumno_data in enumerate(alumnos_data):
-            dni_num = alumno_data['dni'].replace('U', '')
+            dni_num = alumno_data['dni']
             if not Usuario.objects.filter(numero_documento=dni_num).exists():
                 mes = random.randint(1, 12)
                 dia = random.randint(1, 28)
@@ -207,6 +171,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING(f'Curso {curso.nombre} ya existe'))
 
         componentes_por_curso = [
+            # Redes y comunicación de datos I
             [
                 ('Practica calificada 1 (PC1)', Decimal('20.00')),
                 ('Practica calificada 2 (PC2)', Decimal('20.00')),
@@ -214,35 +179,42 @@ class Command(BaseCommand):
                 ('Participacion en clase (PA)', Decimal('10.00')),
                 ('Examen final (EXFN)', Decimal('30.00'))
             ],
-            [
-                ('Practica calificada 1 (PC1)', Decimal('20.00')),
-                ('Practica calificada 2 (PC2)', Decimal('20.00')),
-                ('Practica calificada 3 (PC3)', Decimal('20.00')),
-                ('Proyecto final (PROY)', Decimal('40.00'))
-            ],
-            [
-                ('Avance de proyecto final 1 (APF1)', Decimal('20.00')),
-                ('Avance de proyecto final 2 (APF2)', Decimal('20.00')),
-                ('Avance de proyecto final 3 (APF3)', Decimal('20.00')),
-                ('Proyecto final (PROY)', Decimal('40.00'))
-            ],
+            # Algoritmos y estructuras de datos
             [
                 ('Practica calificada 1 (PC1)', Decimal('20.00')),
                 ('Practica calificada 2 (PC2)', Decimal('20.00')),
                 ('Practica calificada 3 (PC3)', Decimal('20.00')),
                 ('Trabajo final (TF)', Decimal('40.00'))
             ],
+            # Taller de programación web
+            [
+                ('Avance de proyecto final 1 (APF1)', Decimal('20.00')),
+                ('Avance de proyecto final 2 (APF2)', Decimal('20.00')),
+                ('Avance de proyecto final 3 (APF3)', Decimal('20.00')),
+                ('Proyecto final (PROY)', Decimal('40.00'))
+            ],
+            # Base de datos II
             [
                 ('Practica calificada 1 (PC1)', Decimal('20.00')),
                 ('Practica calificada 2 (PC2)', Decimal('20.00')),
                 ('Practica calificada 3 (PC3)', Decimal('20.00')),
-                ('Proyecto final (PROY)', Decimal('40.00'))
+                ('Trabajo final (TF)', Decimal('40.00'))
             ],
+            # Diseño de patrones
+            [
+                ('Practica calificada 1 (PC1)', Decimal('20.00')),
+                ('Practica calificada 2 (PC2)', Decimal('20.00')),
+                ('Practica calificada 3 (PC3)', Decimal('20.00')),
+                ('Participacion en clase (PA)', Decimal('10.00')),
+                ('Examen final (EXFN)', Decimal('30.00'))
+            ],
+            # Negociación y narrativa
             [
                 ('Tarea academica 1 (TA1)', Decimal('30.00')),
                 ('Tarea academica 2 (TA2)', Decimal('30.00')),
                 ('Examen final (EXFN)', Decimal('40.00'))
             ],
+            # Sistemas operativos
             [
                 ('Practica calificada 1 (PC1)', Decimal('20.00')),
                 ('Practica calificada 2 (PC2)', Decimal('20.00')),
@@ -267,68 +239,117 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(self.style.WARNING(f'Componentes de {curso.nombre} ya existen'))
 
-        modalidades = ['presencial', 'virtual', 'remoto']
-        turnos = ['mañana', 'tarde', 'noche']
+        # Configuración de secciones:
+        # profesores[0] = Nahui Xesppe
+        # profesores[1] = Rayme Serrano
+        # profesores[2] = Ecmias Fernandez
+        # profesores[3] = Miguel Angel Farfan
 
-        secciones_info = [
-            ('Lunes 20:15-21:45, Miércoles 20:15-21:45', time(20, 15), time(21, 45)),
-            ('Martes 20:15-21:45, Jueves 20:15-21:45', time(20, 15), time(21, 45)),
-            ('Jueves 11:00-13:15', time(11, 0), time(13, 15)),
-            ('Miércoles 18:30-20:00, Jueves 18:30-20:00', time(18, 30), time(20, 0)),
-            ('Sábado 15:45-18:00', time(15, 45), time(18, 0)),
-            ('Viernes 20:15-21:45', time(20, 15), time(21, 45)),
-            ('Disponible 24/7', time(0, 0), time(23, 59))
+        secciones_config = [
+            # Diseño de patrones - 3 secciones (curso_idx = 4)
+            {'curso_idx': 4, 'codigo': '16309', 'profesor_idx': 3, 'dias': 'Sábado 15:45-18:00', 'hora_inicio': time(15, 45), 'hora_fin': time(18, 0), 'modalidad': 'presencial', 'turno': 'tarde'},
+            {'curso_idx': 4, 'codigo': '16310', 'profesor_idx': 1, 'dias': 'Martes 18:30-20:00', 'hora_inicio': time(18, 30), 'hora_fin': time(20, 0), 'modalidad': 'presencial', 'turno': 'noche'},
+            {'curso_idx': 4, 'codigo': '16311', 'profesor_idx': 2, 'dias': 'Jueves 20:15-21:45', 'hora_inicio': time(20, 15), 'hora_fin': time(21, 45), 'modalidad': 'presencial', 'turno': 'noche'},
+
+            # Taller de programación web - 1 sección (curso_idx = 2)
+            {'curso_idx': 2, 'codigo': '28531', 'profesor_idx': 3, 'dias': 'Jueves 11:00-13:15', 'hora_inicio': time(11, 0), 'hora_fin': time(13, 15), 'modalidad': 'presencial', 'turno': 'mañana'},
+
+            # Algoritmos y estructuras de datos - 2 secciones (curso_idx = 1)
+            {'curso_idx': 1, 'codigo': '16305', 'profesor_idx': 3, 'dias': 'Lunes 08:00-10:15', 'hora_inicio': time(8, 0), 'hora_fin': time(10, 15), 'modalidad': 'presencial', 'turno': 'mañana'},
+            {'curso_idx': 1, 'codigo': '16306', 'profesor_idx': 2, 'dias': 'Miércoles 18:30-20:45', 'hora_inicio': time(18, 30), 'hora_fin': time(20, 45), 'modalidad': 'presencial', 'turno': 'noche'},
+
+            # Redes y comunicación de datos I - 1 sección (curso_idx = 0)
+            {'curso_idx': 0, 'codigo': '11366', 'profesor_idx': 0, 'dias': 'Lunes 20:15-21:45, Miércoles 20:15-21:45', 'hora_inicio': time(20, 15), 'hora_fin': time(21, 45), 'modalidad': 'presencial', 'turno': 'noche'}
         ]
 
         secciones = []
-        for i, curso in enumerate(cursos):
-            codigo_seccion = ['11366', '16305', '28531', '16307', '16309', '28977', '38377'][i]
-            if not Seccion.objects.filter(codigo=codigo_seccion, curso=curso, ciclo=ciclo).exists():
-                dias, hora_inicio, hora_fin = secciones_info[i]
-                modalidad = 'virtual' if i == 6 else 'presencial'
-                turno = 'noche' if i in [0, 1, 5] else 'tarde' if i in [2, 3] else 'mañana'
+        for seccion_data in secciones_config:
+            curso = cursos[seccion_data['curso_idx']]
+            codigo = seccion_data['codigo']
 
+            if not Seccion.objects.filter(codigo=codigo, curso=curso, ciclo=ciclo).exists():
                 seccion = Seccion.objects.create(
-                    codigo=codigo_seccion,
+                    codigo=codigo,
                     curso=curso,
                     ciclo=ciclo,
-                    modalidad=modalidad,
-                    turno=turno,
-                    dias_semana=dias,
-                    hora_inicio=hora_inicio,
-                    hora_fin=hora_fin,
+                    modalidad=seccion_data['modalidad'],
+                    turno=seccion_data['turno'],
+                    dias_semana=seccion_data['dias'],
+                    hora_inicio=seccion_data['hora_inicio'],
+                    hora_fin=seccion_data['hora_fin'],
                     vacantes_totales=30,
                     vacantes_ocupadas=0
                 )
-                seccion.profesores.add(profesores[i])
+
+                profesor = profesores[seccion_data['profesor_idx']]
+                seccion.profesores.add(profesor)
                 secciones.append(seccion)
-                self.stdout.write(self.style.SUCCESS(f'[OK] Sección: {seccion.codigo} - {curso.nombre}'))
+
+                self.stdout.write(self.style.SUCCESS(f'[OK] Sección: {seccion.codigo} - {curso.nombre} (Prof: {profesor.get_full_name()})'))
             else:
-                seccion = Seccion.objects.get(codigo=codigo_seccion, curso=curso, ciclo=ciclo)
+                seccion = Seccion.objects.get(codigo=codigo, curso=curso, ciclo=ciclo)
                 secciones.append(seccion)
                 self.stdout.write(self.style.WARNING(f'Sección {seccion.codigo} ya existe'))
 
-        for seccion in secciones:
-            for alumno in alumnos:
-                if not Matricula.objects.filter(alumno=alumno, seccion=seccion).exists():
-                    try:
-                        MatriculaService.matricular_alumno(alumno.id, seccion.id)
-                        self.stdout.write(self.style.SUCCESS(f'[OK] {alumno.get_full_name()} en {seccion.curso.nombre}'))
-                    except Exception as e:
-                        self.stdout.write(self.style.ERROR(f'Error: {str(e)}'))
+        # Matricular alumnos excepto Juan (índice 0) y Kelvin (índice 1)
+        # Angel: índice 2, Joel: índice 3
 
-        self.stdout.write(self.style.SUCCESS('\nRegistrando notas...'))
-        for matricula in Matricula.objects.all():
-            componentes = ComponenteEvaluacion.objects.filter(curso=matricula.seccion.curso)
-            for componente in componentes:
-                if not Nota.objects.filter(matricula=matricula, componente=componente).exists():
-                    if random.random() > 0.3:
-                        nota_valor = Decimal(str(round(random.uniform(12, 20), 2)))
-                        NotaService.registrar_nota(matricula.id, componente.id, nota_valor)
+        # Matrícula de Angel - una sección por curso
+        matriculas_angel = [
+            {'curso_idx': 4, 'seccion_codigo': '16309'},  # Diseño patrones con Farfan (sábado)
+            {'curso_idx': 2, 'seccion_codigo': '28531'},  # Taller web con Farfan
+            {'curso_idx': 1, 'seccion_codigo': '16305'},  # Algoritmos con Farfan (lunes)
+            {'curso_idx': 0, 'seccion_codigo': '11366'}   # Redes con Nahui
+        ]
 
-        self.stdout.write(self.style.SUCCESS('\n[OK] Datos creados exitosamente!'))
+        # Matrícula de Joel - una sección por curso (diferentes a Angel donde haya opciones)
+        matriculas_joel = [
+            {'curso_idx': 4, 'seccion_codigo': '16310'},  # Diseño patrones con Rayme (martes)
+            {'curso_idx': 2, 'seccion_codigo': '28531'},  # Taller web con Farfan
+            {'curso_idx': 1, 'seccion_codigo': '16306'},  # Algoritmos con Ecmias (miércoles)
+            {'curso_idx': 0, 'seccion_codigo': '11366'}   # Redes con Nahui
+        ]
+
+        # Matricular Angel
+        for matricula_data in matriculas_angel:
+            curso = cursos[matricula_data['curso_idx']]
+            seccion = Seccion.objects.get(codigo=matricula_data['seccion_codigo'], curso=curso, ciclo=ciclo)
+            if not Matricula.objects.filter(alumno=alumnos[2], seccion=seccion).exists():
+                try:
+                    MatriculaService.matricular_alumno(alumnos[2].id, seccion.id)
+                    self.stdout.write(self.style.SUCCESS(f'[OK] {alumnos[2].get_full_name()} matriculado en {seccion.curso.nombre} - {seccion.codigo}'))
+                except Exception as e:
+                    self.stdout.write(self.style.ERROR(f'Error: {str(e)}'))
+
+        # Matricular Joel
+        for matricula_data in matriculas_joel:
+            curso = cursos[matricula_data['curso_idx']]
+            seccion = Seccion.objects.get(codigo=matricula_data['seccion_codigo'], curso=curso, ciclo=ciclo)
+            if not Matricula.objects.filter(alumno=alumnos[3], seccion=seccion).exists():
+                try:
+                    MatriculaService.matricular_alumno(alumnos[3].id, seccion.id)
+                    self.stdout.write(self.style.SUCCESS(f'[OK] {alumnos[3].get_full_name()} matriculado en {seccion.curso.nombre} - {seccion.codigo}'))
+                except Exception as e:
+                    self.stdout.write(self.style.ERROR(f'Error: {str(e)}'))
+
+        self.stdout.write(self.style.SUCCESS(f'\n[INFO] Juan y Kelvin NO fueron matriculados (para demostración de flujo de matrícula)'))
+
+        self.stdout.write(self.style.SUCCESS('\n========================================'))
+        self.stdout.write(self.style.SUCCESS('✓ Datos creados exitosamente!'))
+        self.stdout.write(self.style.SUCCESS('========================================'))
         self.stdout.write(self.style.SUCCESS('\nCredenciales (Usuario/Password):'))
         self.stdout.write(self.style.SUCCESS(f'  Admin: 75911772 / Pedro1415@'))
-        self.stdout.write(self.style.SUCCESS(f'  Profesor: 41523678 / Pedro1415@'))
-        self.stdout.write(self.style.SUCCESS(f'  Alumno: 236265087 / Pedro1415@'))
-        self.stdout.write(self.style.SUCCESS('\nAccede a http://localhost:8000'))
+        self.stdout.write(self.style.SUCCESS(f'  Profesor Nahui: 41523678 / Pedro1415@'))
+        self.stdout.write(self.style.SUCCESS(f'  Profesor Farfan: 44856901 / Pedro1415@'))
+        self.stdout.write(self.style.SUCCESS(f'  Alumno Juan (sin matrícula): 72365087 / Pedro1415@'))
+        self.stdout.write(self.style.SUCCESS(f'  Alumno Angel (matriculado): 74317595 / Pedro1415@'))
+        self.stdout.write(self.style.SUCCESS('\nCursos con secciones disponibles:'))
+        self.stdout.write(self.style.SUCCESS('  - Diseño de patrones (3 secciones)'))
+        self.stdout.write(self.style.SUCCESS('  - Taller de programación web (1 sección)'))
+        self.stdout.write(self.style.SUCCESS('  - Algoritmos y estructuras de datos (2 secciones)'))
+        self.stdout.write(self.style.SUCCESS('  - Redes y comunicación de datos I (1 sección)'))
+        self.stdout.write(self.style.SUCCESS('\nCursos sin secciones (en sistema pero no matriculables):'))
+        self.stdout.write(self.style.SUCCESS('  - Base de datos II'))
+        self.stdout.write(self.style.SUCCESS('  - Negociación y narrativa'))
+        self.stdout.write(self.style.SUCCESS('  - Sistemas operativos'))
+        self.stdout.write(self.style.SUCCESS('\nAccede a: http://localhost:8000'))

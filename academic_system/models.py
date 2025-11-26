@@ -97,7 +97,7 @@ class Usuario(AbstractUser):
         if not self.codigo:
             self.codigo = self.generar_codigo()
         if not self.username:
-            self.username = self.codigo
+            self.username = self.numero_documento
         super().save(*args, **kwargs)
 
 
