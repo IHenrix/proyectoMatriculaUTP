@@ -19,7 +19,7 @@ media/
 staticfiles/
 static/
 !static/img/
-!static/img/logo.png
+!static/img/logo-icono.png
 *.pot
 
 # Base de datos
