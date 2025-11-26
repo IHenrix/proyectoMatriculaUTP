@@ -81,6 +81,64 @@ class Usuario(AbstractUser):
         """Retorna el nombre completo del usuario"""
         return f"{self.first_name} {self.apellido_paterno} {self.apellido_materno}"
 
+    def get_dashboard_url(self):
+        """
+        POLYMORPHISM (GRASP): Comportamiento polimórfico según rol.
+
+        Cada usuario retorna su dashboard apropiado según su rol,
+        sin necesidad de condicionales en el código cliente.
+
+        Returns:
+            str: Nombre de la URL del dashboard correspondiente
+        """
+        dashboard_map = {
+            'administrador': 'admin_dashboard',
+            'profesor': 'profesor_dashboard',
+            'alumno': 'alumno_dashboard',
+        }
+        return dashboard_map.get(self.rol, 'login')
+
+    def puede_gestionar_usuarios(self):
+        """
+        POLYMORPHISM (GRASP): Determina si puede gestionar usuarios.
+
+        Returns:
+            bool: True si el rol permite gestionar usuarios
+        """
+        return self.rol == 'administrador'
+
+    def puede_gestionar_notas(self):
+        """
+        POLYMORPHISM (GRASP): Determina si puede gestionar notas.
+
+        Returns:
+            bool: True si el rol permite gestionar notas
+        """
+        return self.rol in ['administrador', 'profesor']
+
+    def puede_ver_todas_secciones(self):
+        """
+        POLYMORPHISM (GRASP): Determina si puede ver todas las secciones.
+
+        Returns:
+            bool: True si puede ver todas las secciones
+        """
+        return self.rol in ['administrador', 'profesor']
+
+    def get_permisos_descripcion(self):
+        """
+        POLYMORPHISM (GRASP): Retorna descripción de permisos según rol.
+
+        Returns:
+            str: Descripción de los permisos del usuario
+        """
+        permisos_por_rol = {
+            'administrador': 'Acceso completo al sistema: gestión de usuarios, cursos, secciones, ciclos y reportes',
+            'profesor': 'Gestión de notas y visualización de secciones asignadas',
+            'alumno': 'Visualización de notas y gestión de matrículas propias',
+        }
+        return permisos_por_rol.get(self.rol, 'Sin permisos definidos')
+
     @staticmethod
     def generar_codigo():
         """
@@ -173,8 +231,9 @@ class Seccion(models.Model):
     Modelo que representa una sección de un curso en un ciclo.
 
     Patrones:
-    - Composite Pattern: Sección contiene curso, ciclo, profesores
+    - Object Composition: Sección compone curso, ciclo y profesores (relaciones)
     - GRASP Creator: Sección crea relación con profesores
+    - GRASP Information Expert: Conoce su capacidad, vacantes, horarios
     """
 
     MODALIDAD = (
@@ -265,7 +324,11 @@ class Seccion(models.Model):
 
     @property
     def horario_display(self):
-        """Template Method Pattern: Formato de horario según modalidad"""
+        """
+        INFORMATION EXPERT: La sección conoce cómo mostrar su horario.
+
+        Retorna una representación legible del horario según la modalidad.
+        """
         if self.modalidad == 'virtual':
             return '24/7'
         elif self.hora_inicio and self.hora_fin:
@@ -288,7 +351,9 @@ class ComponenteEvaluacion(models.Model):
     """
     Modelo que representa un componente de evaluación de un curso.
 
-    Patrón Composite: Curso compuesto por componentes de evaluación.
+    Patrones:
+    - Object Composition: Curso se compone de múltiples componentes de evaluación
+    - GRASP Information Expert: Conoce su porcentaje y orden en el curso
     """
     curso = models.ForeignKey(Curso, on_delete=models.CASCADE, related_name='componentes')
     nombre = models.CharField(max_length=200)  # Ej: Práctica Calificada 1
@@ -331,7 +396,8 @@ class Matricula(models.Model):
 
     Patrones:
     - Command Pattern: Matrícula como comando que modifica estado
-    - Observer Pattern: Puede notificar cambios
+    - Observer Pattern: Notifica cambios mediante signals (ver signals.py)
+    - GRASP Information Expert: Conoce sus créditos y estado
     """
     alumno = models.ForeignKey(
         Usuario,
@@ -364,22 +430,23 @@ class Matricula(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        Override save para incrementar vacantes ocupadas.
-        Command Pattern: Ejecuta acciones al matricular.
+        Guarda la matrícula.
+
+        OBSERVER PATTERN: La actualización de vacantes ocupadas se maneja
+        mediante signals (ver signals.py), implementando el patrón Observer
+        donde los cambios en Matricula notifican automáticamente a observers
+        que actualizan las vacantes de la sección.
         """
-        is_new = self.pk is None
         super().save(*args, **kwargs)
 
-        if is_new and self.is_active:
-            # Incrementar vacantes ocupadas
-            self.seccion.vacantes_ocupadas += 1
-            self.seccion.save()
-
     def delete(self, *args, **kwargs):
-        """Override delete para decrementar vacantes ocupadas"""
-        if self.is_active:
-            self.seccion.vacantes_ocupadas -= 1
-            self.seccion.save()
+        """
+        Elimina la matrícula.
+
+        OBSERVER PATTERN: La liberación de vacantes se maneja mediante
+        signals (ver signals.py), desacoplando la lógica de gestión de
+        vacantes del modelo Matricula.
+        """
         super().delete(*args, **kwargs)
 
 
@@ -388,8 +455,10 @@ class Nota(models.Model):
     Modelo que representa una nota de un alumno en un componente de evaluación.
 
     Patrones:
-    - Strategy Pattern: Cálculo de promedios
-    - Observer Pattern: Notifica cambios de nota
+    - Strategy Pattern: Cálculo de promedios con diferentes algoritmos
+    - Observer Pattern: Notifica cambios mediante signals (ver signals.py)
+    - GRASP Information Expert: Conoce cómo calcularse y validarse
+    - Singleton Pattern: Usa configuración única del sistema
     """
     matricula = models.ForeignKey(Matricula, on_delete=models.CASCADE, related_name='notas')
     componente = models.ForeignKey(ComponenteEvaluacion, on_delete=models.CASCADE)
@@ -459,6 +528,7 @@ class Nota(models.Model):
     def estado_aprobacion(promedio):
         """
         Strategy Pattern: Determina estado de aprobación.
+        SINGLETON PATTERN: Usa configuración única del sistema.
 
         Args:
             promedio: Decimal o None
@@ -469,9 +539,11 @@ class Nota(models.Model):
         if promedio is None:
             return 'PENDIENTE'
 
-        NOTA_MINIMA_APROBACION = Decimal('11.6')
+        # SINGLETON PATTERN: Obtiene configuración única del sistema
+        from .singleton import ConfiguracionSistema
+        config = ConfiguracionSistema()
 
-        if promedio >= NOTA_MINIMA_APROBACION:
+        if promedio >= config.nota_minima_aprobacion:
             return 'APROBADO'
         else:
             return 'DESAPROBADO'

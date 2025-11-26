@@ -4,6 +4,7 @@ ReporteService - Servicio para generación de reportes
 Patrones de Diseño:
 - Service Layer Pattern
 - Factory Pattern: Creación de reportes según tipo
+- Strategy Pattern: Diferentes estrategias de generación de reportes
 - Builder Pattern: Construcción de reportes complejos
 """
 
@@ -20,37 +21,131 @@ from django.conf import settings
 from academic_system.models import Matricula, Nota
 
 
-class ReporteFactory:
+class ReporteStrategy:
     """
-    Factory Pattern: Crea reportes según el tipo solicitado.
+    STRATEGY PATTERN: Interfaz base para estrategias de generación de reportes.
+
+    Cada estrategia concreta implementa el método generar() para
+    producir un reporte específico en un formato específico.
     """
 
-    @staticmethod
-    def crear_reporte(tipo, formato, **kwargs):
+    def generar(self, **kwargs):
         """
-        Factory Method: Crea un reporte según tipo y formato.
+        Genera el reporte según la estrategia.
 
         Args:
-            tipo: 'lista_alumnos' o 'notas_seccion'
-            formato: 'excel' o 'pdf'
+            **kwargs: Parámetros necesarios para generar el reporte
+
+        Returns:
+            BytesIO: Buffer con el reporte generado
+
+        Raises:
+            NotImplementedError: Si no se implementa en subclase
+        """
+        raise NotImplementedError("Las estrategias deben implementar el método generar()")
+
+
+class ListaAlumnosExcelStrategy(ReporteStrategy):
+    """STRATEGY PATTERN: Estrategia para generar lista de alumnos en Excel"""
+
+    def generar(self, **kwargs):
+        return ReporteBuilder.build_lista_alumnos_excel(kwargs['seccion_id'])
+
+
+class ListaAlumnosPDFStrategy(ReporteStrategy):
+    """STRATEGY PATTERN: Estrategia para generar lista de alumnos en PDF"""
+
+    def generar(self, **kwargs):
+        return ReporteBuilder.build_lista_alumnos_pdf(kwargs['seccion_id'])
+
+
+class NotasSeccionExcelStrategy(ReporteStrategy):
+    """STRATEGY PATTERN: Estrategia para generar notas de sección en Excel"""
+
+    def generar(self, **kwargs):
+        return ReporteBuilder.build_notas_excel(kwargs['seccion_id'])
+
+
+class NotasSeccionPDFStrategy(ReporteStrategy):
+    """STRATEGY PATTERN: Estrategia para generar notas de sección en PDF"""
+
+    def generar(self, **kwargs):
+        return ReporteBuilder.build_notas_pdf(kwargs['seccion_id'])
+
+
+class ReporteFactory:
+    """
+    FACTORY + STRATEGY PATTERN: Selecciona y ejecuta la estrategia apropiada.
+
+    El Factory mantiene un registro de estrategias disponibles y
+    delega la generación a la estrategia correspondiente.
+
+    Ventajas:
+    - Open/Closed Principle: Agregar nuevas estrategias sin modificar el Factory
+    - Fácil extensión: Registrar nuevas estrategias en el diccionario
+    - Sin condicionales anidados: Usa lookup de diccionario
+    """
+
+    # Registro de estrategias disponibles
+    _estrategias = {
+        ('lista_alumnos', 'excel'): ListaAlumnosExcelStrategy(),
+        ('lista_alumnos', 'pdf'): ListaAlumnosPDFStrategy(),
+        ('notas_seccion', 'excel'): NotasSeccionExcelStrategy(),
+        ('notas_seccion', 'pdf'): NotasSeccionPDFStrategy(),
+    }
+
+    @classmethod
+    def registrar_estrategia(cls, tipo, formato, estrategia):
+        """
+        Registra una nueva estrategia de reporte.
+
+        Esto permite extender el sistema con nuevos tipos de reportes
+        sin modificar el código existente (Open/Closed Principle).
+
+        Args:
+            tipo (str): Tipo de reporte
+            formato (str): Formato del reporte
+            estrategia (ReporteStrategy): Instancia de la estrategia
+
+        Ejemplo:
+            ReporteFactory.registrar_estrategia(
+                'estadisticas_curso',
+                'excel',
+                EstadisticasCursoExcelStrategy()
+            )
+        """
+        cls._estrategias[(tipo, formato)] = estrategia
+
+    @classmethod
+    def crear_reporte(cls, tipo, formato, **kwargs):
+        """
+        FACTORY + STRATEGY PATTERN: Crea un reporte usando la estrategia apropiada.
+
+        Args:
+            tipo (str): 'lista_alumnos' o 'notas_seccion'
+            formato (str): 'excel' o 'pdf'
             **kwargs: Parámetros adicionales según el tipo
 
         Returns:
             BytesIO: Buffer con el reporte generado
+
+        Raises:
+            ValueError: Si no existe estrategia para el tipo/formato solicitado
         """
-        if tipo == 'lista_alumnos':
-            if formato == 'excel':
-                return ReporteBuilder.build_lista_alumnos_excel(kwargs['seccion_id'])
-            elif formato == 'pdf':
-                return ReporteBuilder.build_lista_alumnos_pdf(kwargs['seccion_id'])
+        # STRATEGY PATTERN: Seleccionar estrategia del registro
+        estrategia = cls._estrategias.get((tipo, formato))
 
-        elif tipo == 'notas_seccion':
-            if formato == 'excel':
-                return ReporteBuilder.build_notas_excel(kwargs['seccion_id'])
-            elif formato == 'pdf':
-                return ReporteBuilder.build_notas_pdf(kwargs['seccion_id'])
+        if estrategia is None:
+            tipos_disponibles = ', '.join(
+                f"{t}/{f}" for t, f in cls._estrategias.keys()
+            )
+            raise ValueError(
+                f'Tipo de reporte no soportado: {tipo}/{formato}. '
+                f'Disponibles: {tipos_disponibles}'
+            )
 
-        raise ValueError(f'Tipo de reporte no soportado: {tipo} en formato {formato}')
+        # Ejecutar estrategia seleccionada
+        return estrategia.generar(**kwargs)
 
 
 class ReporteBuilder:

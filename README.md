@@ -228,28 +228,97 @@ proyectoFinalDiseño/
 
 ## Patrones de Diseño Implementados
 
-**SOLID:**
-- Single Responsibility Principle
-- Open/Closed Principle
-- Liskov Substitution Principle
-- Interface Segregation Principle
-- Dependency Inversion Principle
+### Principios SOLID ✅
+- ✅ **Single Responsibility Principle**: Cada servicio tiene una responsabilidad única
+- ✅ **Open/Closed Principle**: Estrategias extensibles sin modificar código existente
+- ✅ **Liskov Substitution Principle**: Usuario hereda de AbstractUser correctamente
+- ✅ **Interface Segregation Principle**: Servicios con interfaces específicas
+- ✅ **Dependency Inversion Principle**: Vistas dependen de servicios, no de modelos directamente
 
-**GOF Patterns:**
-- Factory Pattern (Creación de usuarios y reportes)
-- Builder Pattern (Construcción de reportes)
-- Singleton Pattern (Configuración global)
-- Decorator Pattern (Control de acceso por roles)
-- Facade Pattern (Servicios)
-- Strategy Pattern (Validaciones y cálculos)
-- Command Pattern (Operaciones de matrícula)
-- Composite Pattern (Relaciones entre modelos)
+### Patrones Creacionales (GOF)
+- ✅ **Factory Pattern**:
+  - `Usuario.generar_codigo()` - Generación de códigos únicos
+  - `ReporteFactory.crear_reporte()` - Creación de reportes según tipo/formato
+- ✅ **Builder Pattern**:
+  - `ReporteBuilder` - Construcción paso a paso de reportes complejos (Excel, PDF)
+- ✅ **Singleton Pattern**:
+  - `ConfiguracionSistema` - Configuración única del sistema con thread-safety
+  - Django Settings - Configuración global del framework
 
-**GRASP Patterns:**
-- Controller (Vistas como controladores)
-- Information Expert (Modelos conocen sus datos)
-- Creator (Creación de relaciones)
-- Low Coupling / High Cohesion
+### Patrones Estructurales (GOF)
+- ✅ **Facade Pattern**:
+  - Toda la capa de servicios (`UsuarioService`, `MatriculaService`, `NotaService`, `ReporteService`)
+  - Simplifica operaciones complejas con interfaces limpias
+- ✅ **Decorator Pattern**:
+  - `@admin_required`, `@profesor_required`, `@alumno_required` - Control de acceso por roles
+  - `@login_required`, `@transaction.atomic` - Decoradores de Django
+
+### Patrones de Comportamiento (GOF)
+- ✅ **Strategy Pattern**:
+  - `ReporteStrategy` con estrategias concretas para cada tipo de reporte
+  - Cálculo de promedios y validaciones con diferentes algoritmos
+  - `estado_aprobacion()` - Estrategia de aprobación
+- ✅ **Command Pattern**:
+  - `MatriculaService.matricular_alumno()` - Comando de matrícula
+  - `MatriculaService.cambiar_seccion()` - Comando de cambio
+  - `MatriculaService.desmatricular_alumno()` - Comando de desmatrícula
+  - Management commands (`crear_datos_prueba`)
+- ✅ **Observer Pattern**:
+  - `signals.py` - Signals de Django para observar cambios en Matrícula y Nota
+  - `actualizar_vacantes_al_matricular` - Observer de creación de matrícula
+  - `liberar_vacante_al_desmatricular` - Observer de eliminación de matrícula
+
+### Patrones GRASP ⭐ (Implementación Destacada)
+- ✅ **Controller**: Vistas actúan como controladores (MVT de Django)
+- ✅ **Information Expert**: Cada modelo conoce y gestiona su propia información
+  - `Seccion.tiene_vacantes`, `Ciclo.puede_matricularse()`, `Nota.calcular_promedio_ponderado()`
+- ✅ **Creator**: Objetos crean lo que contienen o usan cercanamente
+  - Matrícula crea sus notas asociadas
+  - Usuario genera su propio código
+- ✅ **Low Coupling**: Separación clara entre capas (Models → Services → Views)
+- ✅ **High Cohesion**: Cada clase/módulo tiene responsabilidad única y bien definida
+- ✅ **Pure Fabrication**: Clases de servicio no representan entidades del dominio
+- ✅ **Polymorphism**:
+  - `Usuario.get_dashboard_url()` - Comportamiento polimórfico según rol
+  - `Usuario.puede_gestionar_*()` - Permisos polimórficos
+- ✅ **Protected Variations**: Servicios protegen cambios en modelos
+
+### Patrones Arquitectónicos
+- ✅ **MVT (Model-View-Template)**: Arquitectura de Django
+- ✅ **Service Layer**: Capa de servicios para lógica de negocio
+- ✅ **Repository Pattern**: Django ORM actúa como repositorio
+- ✅ **Active Record**: Modelos de Django con lógica de negocio
+
+### Ubicaciones de Patrones en el Código
+
+**Creacionales:**
+- `academic_system/models.py:142-147` - Factory Method (generar_codigo)
+- `academic_system/services/reporte_service.py:76-148` - Factory Pattern
+- `academic_system/services/reporte_service.py:151-500+` - Builder Pattern
+- `academic_system/singleton.py:1-230` - Singleton Pattern
+
+**Estructurales:**
+- `academic_system/decorators.py:15-77` - Decorator Pattern
+- `academic_system/services/` - Facade Pattern (todos los servicios)
+
+**Comportamiento:**
+- `academic_system/services/reporte_service.py:24-74` - Strategy Pattern
+- `academic_system/services/matricula_service.py:60-172` - Command Pattern
+- `academic_system/signals.py:1-100` - Observer Pattern
+- `academic_system/models.py:517-539` - Strategy Pattern (estado_aprobacion)
+
+**GRASP:**
+- `academic_system/views.py` - Controller
+- `academic_system/models.py` - Information Expert (propiedades y métodos)
+- `academic_system/models.py:84-140` - Polymorphism
+- `academic_system/services/` - Pure Fabrication
+
+### Resumen de Implementación
+- **Total de patrones implementados**: 17+ patrones
+- **Cobertura**: Creacionales (3/5), Estructurales (2/6), Comportamiento (3/5), GRASP (8/8) ⭐
+- **Principios SOLID**: 5/5 ✅
+- **Código documentado**: Todos los patrones tienen comentarios explicativos
+- **Testing**: Lógica de negocio en servicios facilita pruebas unitarias
 
 ## Troubleshooting
 
