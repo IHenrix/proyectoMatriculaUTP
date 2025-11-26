@@ -138,6 +138,7 @@
                                         data-matricula-id="{{ matricula.id }}"
                                         data-componente-id="{{ nota.componente.id }}"
                                         data-nota-id="{{ nota.id|default:'' }}"
+                                        data-porcentaje="{{ nota.componente.porcentaje }}"
                                         data-guardado-en-bd="{% if nota.valor is not None %}true{% else %}false{% endif %}"
                                         onblur="formatearYGuardarNota(this)"
                                         onkeypress="if(event.key === 'Enter') { this.blur(); }"
@@ -560,34 +561,26 @@ function actualizarPromedioFila(matriculaId) {
     const row = document.getElementById(`row-${matriculaId}`);
     const inputs = row.querySelectorAll('.nota-input');
 
-    let suma = 0;
-    let totalPorcentaje = 0;
+    let totalPonderado = 0;
     let hayNotas = false;
 
     inputs.forEach(input => {
         const valor = parseFloat(input.value);
-        if (!isNaN(valor) && valor >= 0) {
+        const porcentaje = parseFloat(input.dataset.porcentaje || '0');
+        if (!isNaN(valor) && valor >= 0 && !isNaN(porcentaje)) {
             hayNotas = true;
-            // Obtener porcentaje del header
-            const componenteId = input.dataset.componenteId;
-            // Por simplicidad, asumimos que todas las notas tienen el mismo peso
-            // En producción, deberías obtener el porcentaje real del componente
-            suma += valor;
-            totalPorcentaje += 1;
+            totalPonderado += valor * (porcentaje / 100);
         }
     });
+
+    const promedio = hayNotas ? parseFloat(totalPonderado.toFixed(2)) : null;
 
     const promedioCell = document.getElementById(`promedio-${matriculaId}`);
     const estadoCell = document.getElementById(`estado-${matriculaId}`);
 
-    if (hayNotas && totalPorcentaje > 0) {
-        const promedio = suma / totalPorcentaje;
-        const promedioFixed = promedio.toFixed(2);
+    if (promedio !== null && !isNaN(promedio)) {
+        promedioCell.innerHTML = `<span class="text-lg font-bold ${promedio >= 11.6 ? 'text-green-600' : 'text-red-600'}">${promedio.toFixed(2)}</span>`;
 
-        // Actualizar promedio
-        promedioCell.innerHTML = `<span class="text-lg font-bold ${promedio >= 11.6 ? 'text-green-600' : 'text-red-600'}">${promedioFixed}</span>`;
-
-        // Actualizar estado
         if (promedio >= 11.6) {
             estadoCell.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                 <i class="fas fa-check-circle mr-1"></i>

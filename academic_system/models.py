@@ -429,26 +429,29 @@ class Nota(models.Model):
         Returns:
             Decimal: Promedio ponderado o None si no hay notas
         """
-        notas = Nota.objects.filter(matricula=matricula, valor__isnull=False)
+        componentes = ComponenteEvaluacion.objects.filter(
+            curso=matricula.seccion.curso
+        )
 
-        if not notas.exists():
+        if not componentes.exists():
             return None
 
         total_ponderado = Decimal('0')
-        total_porcentaje = Decimal('0')
+        hay_notas = False
 
-        for nota in notas:
-            if nota.valor is not None:
-                total_ponderado += (nota.valor * nota.componente.porcentaje) / Decimal('100')
-                total_porcentaje += nota.componente.porcentaje
+        for componente in componentes:
+            nota = Nota.objects.filter(
+                matricula=matricula,
+                componente=componente,
+                valor__isnull=False
+            ).first()
 
-        if total_porcentaje == Decimal('0'):
+            if nota and nota.valor is not None:
+                hay_notas = True
+                total_ponderado += (nota.valor * componente.porcentaje) / Decimal('100')
+
+        if not hay_notas:
             return None
-
-        # Si solo hay notas parciales, ajustar al 100%
-        if total_porcentaje < Decimal('100'):
-            promedio_parcial = (total_ponderado * Decimal('100')) / total_porcentaje
-            return round(promedio_parcial, 2)
 
         return round(total_ponderado, 2)
 
