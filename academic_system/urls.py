@@ -27,6 +27,7 @@ urlpatterns = [
     path('alumno/dashboard/', views.alumno_dashboard, name='alumno_dashboard'),
     path('alumno/matricula/', views.alumno_matricula, name='alumno_matricula'),
     path('alumno/matricular/<int:seccion_id>/', views.alumno_matricular_seccion, name='alumno_matricular_seccion'),
+    path('alumno/desmatricular/<int:matricula_id>/', views.alumno_desmatricular, name='alumno_desmatricular'),
     path('alumno/mis-cursos/', views.alumno_mis_cursos, name='alumno_mis_cursos'),
 
     # API para gráficos

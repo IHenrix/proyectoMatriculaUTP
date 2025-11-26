@@ -303,10 +303,29 @@ def alumno_matricula(request):
     matriculas_actuales = MatriculaService.obtener_matriculas_alumno(alumno.id, ciclo_activo.id)
     creditos_actuales = MatriculaService.calcular_creditos_totales(alumno.id, ciclo_activo.id)
 
+    # Agrupar secciones por curso
+    cursos_disponibles = {}
+    for seccion in secciones:
+        curso_id = seccion.curso.id
+        if curso_id not in cursos_disponibles:
+            cursos_disponibles[curso_id] = {
+                'curso': seccion.curso,
+                'secciones': [],
+                'matriculado': False,
+                'matricula_actual': None
+            }
+        cursos_disponibles[curso_id]['secciones'].append(seccion)
+
+    # Marcar cursos en los que ya está matriculado
+    for matricula in matriculas_actuales:
+        curso_id = matricula.seccion.curso.id
+        if curso_id in cursos_disponibles:
+            cursos_disponibles[curso_id]['matriculado'] = True
+            cursos_disponibles[curso_id]['matricula_actual'] = matricula
+
     context = {
         'ciclo': ciclo_activo,
-        'secciones': secciones,
-        'matriculas_actuales': matriculas_actuales,
+        'cursos_disponibles': cursos_disponibles.values(),
         'creditos_actuales': creditos_actuales,
     }
     return render(request, 'alumno/matricula.html', context)
@@ -323,6 +342,38 @@ def alumno_matricular_seccion(request, seccion_id):
 
         except Exception as e:
             messages.error(request, f'Error al matricular: {str(e)}')
+
+    return redirect('alumno_matricula')
+
+
+@alumno_required
+def alumno_desmatricular(request, matricula_id):
+    """Desmatricular alumno de una sección"""
+    if request.method == 'POST':
+        try:
+            alumno = request.user
+            matricula = Matricula.objects.get(id=matricula_id, alumno=alumno)
+
+            # Verificar que el ciclo permite desmatricularse
+            if not matricula.seccion.ciclo.puede_matricularse():
+                messages.error(request, 'El periodo de matrícula ha finalizado. No puedes retirarte del curso.')
+                return redirect('alumno_matricula')
+
+            # Desactivar la matrícula
+            matricula.is_active = False
+            matricula.save()
+
+            # Actualizar vacantes
+            seccion = matricula.seccion
+            seccion.vacantes_ocupadas -= 1
+            seccion.save()
+
+            messages.success(request, f'Te has retirado exitosamente del curso: {matricula.seccion.curso.nombre}')
+
+        except Matricula.DoesNotExist:
+            messages.error(request, 'Matrícula no encontrada.')
+        except Exception as e:
+            messages.error(request, f'Error al retirarse: {str(e)}')
 
     return redirect('alumno_matricula')
 

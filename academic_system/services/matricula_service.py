@@ -68,7 +68,7 @@ class MatriculaService:
             seccion_id: ID de la sección
 
         Returns:
-            Matricula: Matrícula creada
+            Matricula: Matrícula creada o reactivada
 
         Raises:
             ValidationError: Si la matrícula no es válida
@@ -79,19 +79,33 @@ class MatriculaService:
         # Validar matrícula
         MatriculaService.validar_matricula(alumno, seccion)
 
-        # Crear matrícula
-        matricula = Matricula.objects.create(
+        # Verificar si existe una matrícula inactiva (alumno que se desmatriculó antes)
+        matricula_existente = Matricula.objects.filter(
             alumno=alumno,
-            seccion=seccion
-        )
+            seccion=seccion,
+            is_active=False
+        ).first()
 
-        # Crear notas vacías para cada componente de evaluación
-        componentes = ComponenteEvaluacion.objects.filter(curso=seccion.curso)
-        for componente in componentes:
-            Nota.objects.create(
-                matricula=matricula,
-                componente=componente
+        if matricula_existente:
+            # Reactivar matrícula existente
+            matricula_existente.is_active = True
+            matricula_existente.save()
+
+            matricula = matricula_existente
+        else:
+            # Crear nueva matrícula
+            matricula = Matricula.objects.create(
+                alumno=alumno,
+                seccion=seccion
             )
+
+            # Crear notas vacías para cada componente de evaluación
+            componentes = ComponenteEvaluacion.objects.filter(curso=seccion.curso)
+            for componente in componentes:
+                Nota.objects.create(
+                    matricula=matricula,
+                    componente=componente
+                )
 
         return matricula
 
