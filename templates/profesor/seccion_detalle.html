@@ -140,6 +140,7 @@
                                         data-nota-id="{{ nota.id|default:'' }}"
                                         data-porcentaje="{{ nota.componente.porcentaje }}"
                                         data-guardado-en-bd="{% if nota.valor is not None %}true{% else %}false{% endif %}"
+                                        onfocus="setNotaOriginal(this)"
                                         onblur="formatearYGuardarNota(this)"
                                         onkeypress="if(event.key === 'Enter') { this.blur(); }"
                                     >
@@ -399,13 +400,13 @@ function eliminarNota(button) {
     const componenteId = button.dataset.componenteId;
     const input = button.parentElement.querySelector('.nota-input');
 
-    // Limpiar el input
+    // Limpiar el input (deja la nota como pendiente)
     input.value = '';
     input.classList.add('nota-guardando');
     input.disabled = true;
     button.disabled = true;
 
-    // Enviar petición para eliminar (valor vacío)
+    // Enviar petición con valor vacío (el backend lo convierte a None)
     fetch(`/profesor/nota/${matriculaId}/${componenteId}/`, {
         method: 'POST',
         headers: {
@@ -426,10 +427,11 @@ function eliminarNota(button) {
         input.classList.add('nota-guardada');
         input.disabled = false;
         button.disabled = false;
-        button.classList.add('hidden');
 
         // Marcar que ya no está guardado en BD (valor NULL)
         input.dataset.guardadoEnBd = 'false';
+        input.dataset.originalValue = '';
+        button.classList.add('hidden');
 
         showToast('success', 'Nota eliminada', 'La nota ha sido eliminada. El alumno verá "Pendiente".');
 
@@ -455,14 +457,28 @@ function eliminarNota(button) {
     });
 }
 
+// Registrar valor original en focus
+function setNotaOriginal(input) {
+    input.dataset.originalValue = input.value.trim();
+}
+
 // Formatear y guardar nota
 function formatearYGuardarNota(input) {
-    // Formatear el valor a 2 decimales
-    if (input.value.trim() !== '') {
-        const valorFloat = parseFloat(input.value);
-        if (!isNaN(valorFloat)) {
-            input.value = valorFloat.toFixed(2);
+    const originalValor = (input.dataset.originalValue || '').trim();
+
+    // Si el campo queda vacío y antes tenía un valor, se considera eliminación -> 0.
+    // Si ya estaba vacío y no se escribió nada, no hacer nada.
+    if (input.value.trim() === '') {
+        if (originalValor !== '') {
+            input.value = '0';
+        } else {
+            return; // no hubo cambio real
         }
+    }
+    // Formatear el valor a 2 decimales
+    const valorFloat = parseFloat(input.value);
+    if (!isNaN(valorFloat)) {
+        input.value = valorFloat.toFixed(2);
     }
     // Llamar a la función de guardado
     guardarNota(input);
@@ -474,8 +490,25 @@ function guardarNota(input) {
     const componenteId = input.dataset.componenteId;
     const valor = input.value.trim();
 
+    const normalizar = (val) => {
+        if (val === null || val === undefined) return null;
+        const t = String(val).trim();
+        if (t === '') return null;
+        const num = parseFloat(t);
+        if (isNaN(num)) return null;
+        return num.toFixed(2);
+    };
+
+    const valorNormalizado = normalizar(valor);
+    const originalNormalizado = normalizar(input.dataset.originalValue);
+
+    // Si no hubo cambio, no enviar ni mostrar toast
+    if (valorNormalizado !== null && valorNormalizado === originalNormalizado) {
+        return;
+    }
+
     // Validar valor
-    if (valor !== '' && (parseFloat(valor) < 0 || parseFloat(valor) > 20)) {
+    if (valorNormalizado === null || parseFloat(valorNormalizado) < 0 || parseFloat(valorNormalizado) > 20) {
         input.classList.add('nota-error');
         showToast('error', 'Error', 'La nota debe estar entre 0 y 20');
         setTimeout(() => {
@@ -495,7 +528,7 @@ function guardarNota(input) {
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-CSRFToken': csrftoken
         },
-        body: `valor=${valor || ''}`
+        body: `valor=${valorNormalizado}`
     })
     .then(response => {
         if (!response.ok) {
