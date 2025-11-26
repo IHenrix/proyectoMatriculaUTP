@@ -147,7 +147,7 @@
                                     <button
                                         type="button"
                                         class="btn-eliminar-nota text-red-600 hover:text-red-800 hover:bg-red-50 rounded p-1.5 transition {% if nota.valor is None %}hidden{% endif %}"
-                                        onclick="eliminarNota(this)"
+                                        onclick="mostrarModalEliminar(this)"
                                         data-matricula-id="{{ matricula.id }}"
                                         data-componente-id="{{ nota.componente.id }}"
                                         title="Eliminar nota"
@@ -343,6 +343,35 @@
     </div>
 </div>
 
+<!-- Modal de confirmaci?n para eliminar nota -->
+<div id="modal-eliminar" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+    <div class="bg-white rounded-lg shadow-2xl w-80 p-5">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <div class="h-10 w-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                    <i class="fas fa-trash"></i>
+                </div>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-lg font-semibold text-gray-900">Eliminar nota</h3>
+                <p class="mt-1 text-sm text-gray-600">
+                    La nota quedará como <strong>Pendiente</strong>. ?Deseas continuar?
+                </p>
+            </div>
+        </div>
+        <div class="mt-5 flex justify-end space-x-3">
+            <button type="button" onclick="cerrarModalEliminar()" class="px-4 py-2 rounded-md border text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Cancelar
+            </button>
+            <button type="button" onclick="confirmarEliminarNota()" class="px-4 py-2 rounded-md bg-red-600 text-white text-sm font-semibold hover:bg-red-700">
+                Eliminar
+            </button>
+        </div>
+    </div>
+</div>
+
+</div>
+
 <script>
 // CSRF Token para peticiones AJAX
 function getCookie(name) {
@@ -390,12 +419,38 @@ function showToast(type, title, message) {
     }, 3000);
 }
 
+let pendingDeleteButton = null;
+
+function mostrarModalEliminar(button) {
+    pendingDeleteButton = button;
+    const modal = document.getElementById('modal-eliminar');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    } else {
+        // Fallback: si no carga el modal, eliminar directamente
+        eliminarNota(button);
+    }
+}
+
+function cerrarModalEliminar() {
+    pendingDeleteButton = null;
+    const modal = document.getElementById('modal-eliminar');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+}
+
+function confirmarEliminarNota() {
+    if (pendingDeleteButton) {
+        eliminarNota(pendingDeleteButton);
+    }
+    cerrarModalEliminar();
+}
+
 // Eliminar nota
 function eliminarNota(button) {
-    if (!confirm('¿Estás seguro de que deseas eliminar esta nota? Al alumno le aparecerá como "Pendiente".')) {
-        return;
-    }
-
     const matriculaId = button.dataset.matriculaId;
     const componenteId = button.dataset.componenteId;
     const input = button.parentElement.querySelector('.nota-input');
