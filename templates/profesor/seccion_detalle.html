@@ -82,7 +82,7 @@
             <div class="flex items-center">
                 <i class="fas fa-info-circle text-blue-500 mr-3"></i>
                 <div class="text-sm text-blue-700">
-                    <strong>Instrucciones:</strong> Haz click en cualquier celda de nota para editarla. La nota se guardará automáticamente al salir del campo. Las notas >= 11.6 se marcan en verde (aprobado).
+                    <strong>Instrucciones:</strong> Haz click en cualquier celda de nota para editarla. La nota se guardará automáticamente al salir del campo. Usa el botón <i class="fas fa-trash text-xs"></i> para eliminar una nota (aparecerá como "Pendiente" al alumno). Las notas >= 11.6 se marcan en verde (aprobado).
                 </div>
             </div>
         </div>
@@ -99,7 +99,7 @@
                                 Alumno
                             </th>
                             {% for componente in componentes %}
-                            <th scope="col" class="py-3 text-center text-xs font-medium text-gray-500 uppercase" style="min-width: 120px; max-width: 120px; width: 120px;">
+                            <th scope="col" class="py-3 text-center text-xs font-medium text-gray-500 uppercase" style="min-width: 150px; max-width: 150px; width: 150px;">
                                 <div class="leading-tight">
                                     {{ componente.nombre }}
                                     <br>
@@ -125,21 +125,34 @@
                                 {{ matricula.alumno.get_full_name }}
                             </td>
                             {% for nota in matricula.notas_ordenadas %}
-                            <td class="py-3 text-center" style="min-width: 120px; max-width: 120px; width: 120px;">
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    max="20"
-                                    {% if nota.valor is not None %}value="{{ nota.valor|format_decimal }}"{% endif %}
-                                    class="nota-input w-full text-center border border-gray-300 rounded px-2 py-2 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-                                    placeholder="--"
-                                    data-matricula-id="{{ matricula.id }}"
-                                    data-componente-id="{{ nota.componente.id }}"
-                                    data-nota-id="{{ nota.id|default:'' }}"
-                                    onblur="formatearYGuardarNota(this)"
-                                    onkeypress="if(event.key === 'Enter') { this.blur(); }"
-                                >
+                            <td class="py-3 text-center" style="min-width: 150px; max-width: 150px; width: 150px;">
+                                <div class="flex items-center justify-center gap-1">
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        max="20"
+                                        {% if nota.valor is not None %}value="{{ nota.valor|format_decimal }}"{% endif %}
+                                        class="nota-input flex-1 text-center border border-gray-300 rounded px-2 py-2 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                                        placeholder="Pendiente"
+                                        data-matricula-id="{{ matricula.id }}"
+                                        data-componente-id="{{ nota.componente.id }}"
+                                        data-nota-id="{{ nota.id|default:'' }}"
+                                        data-guardado-en-bd="{% if nota.valor is not None %}true{% else %}false{% endif %}"
+                                        onblur="formatearYGuardarNota(this)"
+                                        onkeypress="if(event.key === 'Enter') { this.blur(); }"
+                                    >
+                                    <button
+                                        type="button"
+                                        class="btn-eliminar-nota text-red-600 hover:text-red-800 hover:bg-red-50 rounded p-1.5 transition {% if nota.valor is None %}hidden{% endif %}"
+                                        onclick="eliminarNota(this)"
+                                        data-matricula-id="{{ matricula.id }}"
+                                        data-componente-id="{{ nota.componente.id }}"
+                                        title="Eliminar nota"
+                                    >
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
                             </td>
                             {% endfor %}
                             <td class="px-6 py-4 whitespace-nowrap text-center bg-primary-50" id="promedio-{{ matricula.id }}">
@@ -375,6 +388,72 @@ function showToast(type, title, message) {
     }, 3000);
 }
 
+// Eliminar nota
+function eliminarNota(button) {
+    if (!confirm('¿Estás seguro de que deseas eliminar esta nota? Al alumno le aparecerá como "Pendiente".')) {
+        return;
+    }
+
+    const matriculaId = button.dataset.matriculaId;
+    const componenteId = button.dataset.componenteId;
+    const input = button.parentElement.querySelector('.nota-input');
+
+    // Limpiar el input
+    input.value = '';
+    input.classList.add('nota-guardando');
+    input.disabled = true;
+    button.disabled = true;
+
+    // Enviar petición para eliminar (valor vacío)
+    fetch(`/profesor/nota/${matriculaId}/${componenteId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': csrftoken
+        },
+        body: 'valor='
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al eliminar');
+        }
+        return response.text();
+    })
+    .then(() => {
+        // Éxito
+        input.classList.remove('nota-guardando', 'nota-aprobada', 'nota-desaprobada');
+        input.classList.add('nota-guardada');
+        input.disabled = false;
+        button.disabled = false;
+        button.classList.add('hidden');
+
+        // Marcar que ya no está guardado en BD (valor NULL)
+        input.dataset.guardadoEnBd = 'false';
+
+        showToast('success', 'Nota eliminada', 'La nota ha sido eliminada. El alumno verá "Pendiente".');
+
+        // Actualizar promedio y estado
+        actualizarPromedioFila(matriculaId);
+
+        // Limpiar estilos después de 1 segundo
+        setTimeout(() => {
+            input.classList.remove('nota-guardada');
+        }, 1500);
+    })
+    .catch(error => {
+        // Error
+        input.classList.remove('nota-guardando');
+        input.classList.add('nota-error');
+        input.disabled = false;
+        button.disabled = false;
+        showToast('error', 'Error al eliminar', 'No se pudo eliminar la nota. Intenta nuevamente.');
+
+        setTimeout(() => {
+            input.classList.remove('nota-error');
+        }, 2000);
+    });
+}
+
 // Formatear y guardar nota
 function formatearYGuardarNota(input) {
     // Formatear el valor a 2 decimales
@@ -439,8 +518,18 @@ function guardarNota(input) {
                 input.classList.add('nota-desaprobada');
                 input.classList.remove('nota-aprobada');
             }
+
+            // Marcar que está guardado en BD y mostrar botón de eliminar
+            input.dataset.guardadoEnBd = 'true';
+            const button = input.parentElement.querySelector('.btn-eliminar-nota');
+            button.classList.remove('hidden');
         } else {
             input.classList.remove('nota-aprobada', 'nota-desaprobada');
+
+            // Marcar que ya no está guardado en BD y ocultar botón
+            input.dataset.guardadoEnBd = 'false';
+            const button = input.parentElement.querySelector('.btn-eliminar-nota');
+            button.classList.add('hidden');
         }
 
         showToast('success', 'Nota guardada', `Nota ${valor || 'eliminada'} registrada correctamente`);
