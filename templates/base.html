@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ UNIVERSITY_NAME }}{% endblock %}</title>
 
-    <!-- Tailwind CSS CDN -->
+    
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Configuración de Tailwind personalizada -->
+    
     <script>
         tailwind.config = {
             theme: {
@@ -32,13 +32,13 @@
         }
     </script>
 
-    <!-- ApexCharts (para gráficos) -->
+    
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
-    <!-- Font Awesome para iconos -->
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Estilos personalizados -->
+    
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 
@@ -47,7 +47,7 @@
 <body class="h-full">
     <div class="min-h-full">
         {% if user.is_authenticated %}
-        <!-- Navbar -->
+        
         <nav class="bg-primary-600 shadow-lg">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 items-center justify-between">
@@ -107,7 +107,7 @@
         </nav>
         {% endif %}
 
-        <!-- Messages/Alerts -->
+        
         {% if messages %}
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4">
             {% for message in messages %}
@@ -135,7 +135,7 @@
         </div>
         {% endif %}
 
-        <!-- Header -->
+        
         <header class="bg-white shadow-sm">
             <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
                 {% block header %}
@@ -144,7 +144,7 @@
             </div>
         </header>
 
-        <!-- Main Content -->
+        
         <main>
             <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
                 {% block content %}
@@ -152,7 +152,7 @@
             </div>
         </main>
 
-        <!-- Footer -->
+        
         <footer class="bg-white border-t border-gray-200 mt-12">
             <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                 <p class="text-center text-sm text-gray-500">

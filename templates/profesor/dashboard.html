@@ -4,18 +4,18 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto">
-    <!-- Header -->
+    
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">Mis Secciones</h1>
         <p class="mt-2 text-sm text-gray-600">Gestiona las secciones asignadas, registra notas y visualiza estadísticas</p>
     </div>
 
     {% if secciones %}
-    <!-- Grid de Secciones -->
+    
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {% for seccion in secciones %}
         <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
-            <!-- Header de la tarjeta -->
+            
             <div class="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-4">
                 <div class="flex items-center justify-between">
                     <div>
@@ -28,9 +28,9 @@
                 </div>
             </div>
 
-            <!-- Contenido de la tarjeta -->
+            
             <div class="px-6 py-4">
-                <!-- Información del curso -->
+                
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div class="flex items-center text-sm text-gray-600">
                         <i class="fas fa-calendar-alt text-primary-600 mr-2"></i>
@@ -50,7 +50,7 @@
                     </div>
                 </div>
 
-                <!-- Estadísticas -->
+                
                 <div class="grid grid-cols-3 gap-3 mb-4 pt-4 border-t border-gray-200">
                     <div class="text-center">
                         <p class="text-2xl font-bold text-primary-600">{{ seccion.matriculas.count }}</p>
@@ -66,7 +66,7 @@
                     </div>
                 </div>
 
-                <!-- Horario -->
+                
                 {% if seccion.horario %}
                 <div class="bg-gray-50 rounded-md p-3 mb-4">
                     <p class="text-xs text-gray-500 mb-1">
@@ -77,7 +77,7 @@
                 </div>
                 {% endif %}
 
-                <!-- Botón de acción -->
+                
                 <a href="{% url 'profesor_seccion_detalle' seccion.id %}" class="block w-full text-center px-4 py-2.5 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition font-medium shadow-sm hover:shadow">
                     <i class="fas fa-clipboard-list mr-2"></i>
                     Ver Sección Completa
@@ -87,7 +87,7 @@
         {% endfor %}
     </div>
     {% else %}
-    <!-- Estado vacío -->
+    
     <div class="bg-white rounded-lg shadow-lg p-12 text-center">
         <div class="text-gray-400">
             <i class="fas fa-chalkboard text-6xl mb-4"></i>
@@ -97,7 +97,7 @@
     </div>
     {% endif %}
 
-    <!-- Información adicional -->
+    
     <div class="mt-8 bg-gradient-to-r from-blue-50 to-white border border-blue-200 rounded-lg p-6">
         <div class="flex items-start">
             <div class="flex-shrink-0">

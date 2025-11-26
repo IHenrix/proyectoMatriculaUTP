@@ -4,13 +4,13 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto">
-    <!-- Header -->
+    
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">Mi Panel de Estudiante</h1>
         <p class="mt-2 text-sm text-gray-600">Bienvenido, {{ user.get_full_name }}</p>
     </div>
 
-    <!-- Ciclo Activo Info -->
+    
     {% if ciclo_activo %}
     <div class="bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg shadow-lg p-6 mb-8 text-white">
         <div class="flex items-center justify-between">
@@ -37,9 +37,9 @@
         </div>
     </div>
 
-    <!-- Estadísticas -->
+    
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-3 mb-8">
-        <!-- Cursos Matriculados -->
+        
         <div class="bg-white overflow-hidden shadow-lg rounded-lg">
             <div class="p-5">
                 <div class="flex items-center">
@@ -58,7 +58,7 @@
             </div>
         </div>
 
-        <!-- Créditos Totales -->
+        
         <div class="bg-white overflow-hidden shadow-lg rounded-lg">
             <div class="p-5">
                 <div class="flex items-center">
@@ -77,7 +77,7 @@
             </div>
         </div>
 
-        <!-- Estado -->
+        
         <div class="bg-white overflow-hidden shadow-lg rounded-lg">
             <div class="p-5">
                 <div class="flex items-center">
@@ -97,9 +97,9 @@
         </div>
     </div>
 
-    <!-- Acciones Rápidas -->
+    
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-8">
-        <!-- Matricularse -->
+        
         <a href="{% url 'alumno_matricula' %}" class="block bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -118,7 +118,7 @@
             </div>
         </a>
 
-        <!-- Ver Mis Cursos -->
+        
         <a href="{% url 'alumno_mis_cursos' %}" class="block bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -132,7 +132,7 @@
         </a>
     </div>
 
-    <!-- Cursos Matriculados -->
+    
     {% if matriculas %}
     <div class="mb-8">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Mis Cursos - {{ ciclo_activo.nombre }}</h2>
@@ -190,7 +190,7 @@
     </div>
     {% endif %}
     {% else %}
-    <!-- Sin ciclo activo -->
+    
     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
         <div class="flex">
             <div class="flex-shrink-0">

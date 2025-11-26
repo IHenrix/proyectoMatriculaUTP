@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto">
-    <!-- Header -->
+    
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">Matrícula - {{ ciclo.nombre }}</h1>
         <p class="mt-2 text-sm text-gray-600">
@@ -12,7 +12,7 @@
         </p>
     </div>
 
-    <!-- Tabs de navegación -->
+    
     <div class="mb-6 border-b border-gray-200">
         <nav class="-mb-px flex space-x-8" aria-label="Tabs">
             <a href="#" onclick="switchTab('cursos-disponibles'); return false;" id="tab-cursos-disponibles" class="border-primary-500 text-primary-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
@@ -29,13 +29,13 @@
         </nav>
     </div>
 
-    <!-- Tab Content: Cursos Disponibles -->
+    
     <div id="content-cursos-disponibles" class="tab-content">
         {% if cursos_disponibles %}
         <div class="space-y-6">
             {% for item in cursos_disponibles %}
             <div class="bg-white rounded-lg shadow-lg overflow-hidden border-2 {% if item.matriculado %}border-green-500{% else %}border-gray-200{% endif %}">
-                <!-- Header del Curso -->
+                
                 <div class="bg-gradient-to-r from-primary-600 to-primary-700 p-6">
                     <div class="flex items-start justify-between">
                         <div class="flex-1">
@@ -57,7 +57,7 @@
                     </div>
                 </div>
 
-                <!-- Secciones del Curso -->
+                
                 <div class="p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">
                         <i class="fas fa-users text-primary-600 mr-2"></i>
@@ -67,7 +67,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {% for seccion in item.secciones %}
                         <div class="border rounded-lg p-4 hover:shadow-md transition {% if item.matriculado and item.matricula_actual.seccion.id == seccion.id %}bg-green-50 border-green-500 border-2{% else %}bg-gray-50{% endif %}">
-                            <!-- Sección Header -->
+                            
                             <div class="flex items-start justify-between mb-3">
                                 <div>
                                     <h4 class="font-semibold text-gray-900">{{ seccion.codigo }}</h4>
@@ -81,7 +81,7 @@
                                 {% endif %}
                             </div>
 
-                            <!-- Profesor -->
+                            
                             <div class="mb-2">
                                 <p class="text-xs text-gray-500 mb-1">
                                     <i class="fas fa-chalkboard-teacher mr-1"></i>
@@ -92,7 +92,7 @@
                                 {% endfor %}
                             </div>
 
-                            <!-- Horario -->
+                            
                             <div class="mb-3">
                                 <p class="text-xs text-gray-500 mb-1">
                                     <i class="fas fa-clock mr-1"></i>
@@ -102,7 +102,7 @@
                                 <p class="text-xs text-gray-600">{{ seccion.hora_inicio|time:"H:i" }} - {{ seccion.hora_fin|time:"H:i" }}</p>
                             </div>
 
-                            <!-- Botón de Acción -->
+                            
                             {% if item.matriculado and item.matricula_actual.seccion.id == seccion.id %}
                             <button onclick="confirmarDesmatricular({{ item.matricula_actual.id }}, '{{ item.curso.nombre }}', '{{ seccion.codigo }}', '{{ seccion.profesores.all.0.get_full_name }}', '{{ seccion.dias_semana }}')" class="w-full px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition font-medium text-sm shadow-sm">
                                 <i class="fas fa-times-circle mr-1"></i>
@@ -140,7 +140,7 @@
         {% endif %}
     </div>
 
-    <!-- Tab Content: Mis Matrículas -->
+    
     <div id="content-mis-matriculas" class="tab-content hidden">
         <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-4">
@@ -234,7 +234,7 @@
     </div>
 </div>
 
-<!-- Modal de Confirmación Matrícula -->
+
 <div id="modalMatricula" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="cerrarModalMatricula()"></div>
@@ -310,7 +310,7 @@
     </div>
 </div>
 
-<!-- Modal de Confirmación Desmatrícula -->
+
 <div id="modalDesmatricular" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="cerrarModalDesmatricular()"></div>
