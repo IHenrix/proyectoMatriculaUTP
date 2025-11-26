@@ -596,33 +596,46 @@ function actualizarPromedioFila(matriculaId) {
 
     let totalPonderado = 0;
     let hayNotas = false;
+    let llenos = 0;
+    const total = inputs.length;
 
     inputs.forEach(input => {
         const valor = parseFloat(input.value);
         const porcentaje = parseFloat(input.dataset.porcentaje || '0');
         if (!isNaN(valor) && valor >= 0 && !isNaN(porcentaje)) {
             hayNotas = true;
+            llenos += 1;
             totalPonderado += valor * (porcentaje / 100);
         }
     });
 
+    const notasCompletas = hayNotas && llenos === total;
     const promedio = hayNotas ? parseFloat(totalPonderado.toFixed(2)) : null;
 
     const promedioCell = document.getElementById(`promedio-${matriculaId}`);
     const estadoCell = document.getElementById(`estado-${matriculaId}`);
 
     if (promedio !== null && !isNaN(promedio)) {
-        promedioCell.innerHTML = `<span class="text-lg font-bold ${promedio >= 11.6 ? 'text-green-600' : 'text-red-600'}">${promedio.toFixed(2)}</span>`;
+        // El color del promedio refleja el valor (rojo/verde) aunque el estado quede pendiente si falta alguna nota
+        const colorClase = (promedio >= 11.6 ? 'text-green-600' : 'text-red-600');
+        promedioCell.innerHTML = `<span class="text-lg font-bold ${colorClase}">${promedio.toFixed(2)}</span>`;
 
-        if (promedio >= 11.6) {
-            estadoCell.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                <i class="fas fa-check-circle mr-1"></i>
-                APROBADO
-            </span>`;
+        if (notasCompletas) {
+            if (promedio >= 11.6) {
+                estadoCell.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <i class="fas fa-check-circle mr-1"></i>
+                    APROBADO
+                </span>`;
+            } else {
+                estadoCell.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    <i class="fas fa-times-circle mr-1"></i>
+                    DESAPROBADO
+                </span>`;
+            }
         } else {
-            estadoCell.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                <i class="fas fa-times-circle mr-1"></i>
-                DESAPROBADO
+            estadoCell.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                <i class="fas fa-clock mr-1"></i>
+                PENDIENTE
             </span>`;
         }
     } else {

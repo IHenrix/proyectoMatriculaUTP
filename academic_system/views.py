@@ -199,7 +199,8 @@ def profesor_seccion_detalle(request, seccion_id):
         # Calcular promedio
         resultado = NotaService.calcular_promedio_matricula(matricula.id)
         matricula.promedio_final = resultado['promedio']
-        matricula.estado_final = resultado['estado']
+        matricula.estado_final = resultado['estado'] if resultado['notas_completas'] else 'PENDIENTE'
+        matricula.notas_completas = resultado['notas_completas']
 
     context = {
         'seccion': seccion,
