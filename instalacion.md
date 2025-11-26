@@ -96,8 +96,8 @@ Abrir navegador en: http://localhost:8000
 ## Credenciales de Acceso
 
 Administrador:
-- Usuario: admin
-- Contraseña: admin123
+- Usuario: 75911772
+- Contraseña: Pedro1415@
 
 Profesor y Alumno:
 - Usar los códigos y contraseñas que mostró el comando crear_datos_prueba
@@ -107,11 +107,6 @@ Profesor y Alumno:
 Detener servidor:
 ```
 Ctrl + C
-```
-
-Crear superusuario adicional:
-```bash
-python manage.py createsuperuser
 ```
 
 Acceder a Django Admin:
