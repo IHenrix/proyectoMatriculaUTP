@@ -140,6 +140,8 @@ def admin_usuario_create(request):
                 'fecha_nacimiento': request.POST.get('fecha_nacimiento') or None,
                 'sexo': request.POST.get('sexo'),
                 'rol': request.POST.get('rol'),
+                'username': request.POST.get('username'),
+                'password': request.POST.get('password') or request.POST.get('numero_documento'),
             }
 
             usuario = UsuarioService.crear_usuario(datos)

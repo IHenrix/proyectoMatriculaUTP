@@ -73,7 +73,7 @@
                         </label>
                         <select name="tipo_documento" id="tipo_documento" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
                             <option value="DNI">DNI</option>
-                            <option value="Pasaporte">Pasaporte</option>
+                            <option value="PASAPORTE">PASAPORTE</option>
                             <option value="CE">Carnet de Extranjería</option>
                         </select>
                     </div>
@@ -98,6 +98,24 @@
                             <option value="profesor">Profesor</option>
                             <option value="alumno">Alumno</option>
                         </select>
+                    </div>
+
+                    <!-- Username -->
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+                            Usuario (username) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="username" id="username" required class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" placeholder="ej: u75911772">
+                        <p class="mt-1 text-xs text-gray-500">Debe ser único. Se usará para iniciar sesión.</p>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+                            Contraseña
+                        </label>
+                        <input type="password" name="password" id="password" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" placeholder="Dejar vacío para usar el documento">
+                        <p class="mt-1 text-xs text-gray-500">Si lo dejas vacío, se usará el número de documento como contraseña.</p>
                     </div>
                 </div>
             </div>
@@ -146,8 +164,9 @@
                             <strong>Información importante:</strong>
                         </p>
                         <ul class="mt-2 text-xs text-blue-600 list-disc list-inside space-y-1">
-                            <li>El código de usuario se generará automáticamente</li>
-                            <li>La contraseña por defecto será el número de documento ingresado</li>
+                            <li>El código de usuario se generará automáticamente (código interno)</li>
+                            <li>El username debe ser único y se usa para iniciar sesión</li>
+                            <li>Si no ingresas contraseña, se usará el número de documento</li>
                             <li>El usuario debe cambiar su contraseña en el primer inicio de sesión</li>
                         </ul>
                     </div>
