@@ -20,6 +20,8 @@ staticfiles/
 static/
 !static/img/
 !static/img/logo-icono.png
+!static/css/
+!static/css/custom.css
 *.pot
 
 # Base de datos
