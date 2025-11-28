@@ -61,10 +61,28 @@ class CursoAdmin(admin.ModelAdmin):
 class CicloAdmin(admin.ModelAdmin):
     """Admin para el modelo Ciclo"""
 
-    list_display = ('nombre', 'fecha_inicio_matricula', 'fecha_fin_matricula', 'matricula_abierta', 'created_at')
-    list_filter = ('matricula_abierta',)
+    list_display = (
+        'nombre', 'fecha_inicio_ciclo', 'fecha_fin_ciclo',
+        'matricula_abierta', 'ciclo_terminado', 'created_at'
+    )
+    list_filter = ('ciclo_terminado', 'matricula_abierta')
     search_fields = ('nombre',)
     ordering = ('-nombre',)
+
+    fieldsets = (
+        ('Información del Ciclo', {
+            'fields': ('nombre', 'fecha_inicio_ciclo', 'fecha_fin_ciclo'),
+            'description': 'Rango de fechas del ciclo académico'
+        }),
+        ('Período de Matrícula', {
+            'fields': ('fecha_inicio_matricula', 'fecha_fin_matricula', 'matricula_abierta'),
+            'description': 'Configuración del período de matrícula'
+        }),
+        ('Estado del Ciclo', {
+            'fields': ('ciclo_terminado',),
+            'description': 'Marque esta opción cuando el ciclo haya finalizado. Las notas quedarán bloqueadas.'
+        }),
+    )
 
 
 @admin.register(Seccion)

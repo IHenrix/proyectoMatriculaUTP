@@ -15,6 +15,9 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         self.stdout.write(self.style.SUCCESS('Creando datos de prueba...'))
 
+        # ============================================
+        # ADMIN
+        # ============================================
         if not Usuario.objects.filter(numero_documento='75911772').exists():
             admin = Usuario.objects.create_superuser(
                 username='75911772',
@@ -36,27 +39,18 @@ class Command(BaseCommand):
             admin = Usuario.objects.get(numero_documento='75911772')
             self.stdout.write(self.style.WARNING('Admin ya existe'))
 
+        # ============================================
+        # PROFESORES
+        # ============================================
         profesores_data = [
             {
-                'nombre': 'Nahui',
-                'apellido_paterno': 'Xesppe',
-                'apellido_materno': 'Clive',
+                'nombre': 'Miguel Angel',
+                'apellido_paterno': 'Farfan',
+                'apellido_materno': 'Leyva',
                 'tipo_documento': 'DNI',
-                'numero_documento': '41523678',
-                'email': 'nahui.xesppe@utp.edu.pe',
-                'telefono': '987123456',
-                'sexo': 'M',
-                'rol': 'profesor',
-                'password': 'Pedro1415@'
-            },
-            {
-                'nombre': 'Rayme',
-                'apellido_paterno': 'Serrano',
-                'apellido_materno': 'Ruben Alejandro',
-                'tipo_documento': 'DNI',
-                'numero_documento': '42634789',
-                'email': 'rayme.serrano@utp.edu.pe',
-                'telefono': '987234567',
+                'numero_documento': '44856901',
+                'email': 'miguel.farfan@utp.edu.pe',
+                'telefono': '987456789',
                 'sexo': 'M',
                 'rol': 'profesor',
                 'password': 'Pedro1415@'
@@ -74,13 +68,13 @@ class Command(BaseCommand):
                 'password': 'Pedro1415@'
             },
             {
-                'nombre': 'Miguel Angel',
-                'apellido_paterno': 'Farfan',
-                'apellido_materno': 'Leyva',
+                'nombre': 'Adrian Guillermo',
+                'apellido_paterno': 'Arce',
+                'apellido_materno': 'Holgado',
                 'tipo_documento': 'DNI',
-                'numero_documento': '44856901',
-                'email': 'miguel.farfan@utp.edu.pe',
-                'telefono': '987456789',
+                'numero_documento': '45967823',
+                'email': 'adrian.arce@utp.edu.pe',
+                'telefono': '987567890',
                 'sexo': 'M',
                 'rol': 'profesor',
                 'password': 'Pedro1415@'
@@ -92,17 +86,17 @@ class Command(BaseCommand):
             if not Usuario.objects.filter(numero_documento=prof_data['numero_documento']).exists():
                 profesor = UsuarioService.crear_usuario(prof_data)
                 profesores.append(profesor)
-                self.stdout.write(self.style.SUCCESS(f'[OK] Profesor: {profesor.codigo} / Pedro1415@'))
+                self.stdout.write(self.style.SUCCESS(f'[OK] Profesor: {profesor.get_full_name()} ({profesor.codigo}) / Pedro1415@'))
             else:
                 profesor = Usuario.objects.get(numero_documento=prof_data['numero_documento'])
                 profesores.append(profesor)
                 self.stdout.write(self.style.WARNING(f'Profesor {profesor.codigo} ya existe'))
 
+        # ============================================
+        # ALUMNOS
+        # ============================================
         alumnos_data = [
-            {'nombre': 'Juan Jose', 'apellido_paterno': 'Morales', 'apellido_materno': 'Velasquez', 'dni': '72365087', 'anio': 1998},
             {'nombre': 'Kelvin Jesus', 'apellido_paterno': 'Acevedo', 'apellido_materno': 'Huarachi', 'dni': '73309801', 'anio': 1999},
-            {'nombre': 'Angel', 'apellido_paterno': 'Campusano', 'apellido_materno': 'Solis', 'dni': '74317595', 'anio': 1997},
-            {'nombre': 'Joel Anthony', 'apellido_paterno': 'Saldaña', 'apellido_materno': 'Chavez', 'dni': '75650077', 'anio': 2000}
         ]
 
         alumnos = []
@@ -126,230 +120,241 @@ class Command(BaseCommand):
                 }
                 alumno = UsuarioService.crear_usuario(data)
                 alumnos.append(alumno)
-                self.stdout.write(self.style.SUCCESS(f'[OK] Alumno: {alumno.codigo} / Pedro1415@'))
+                self.stdout.write(self.style.SUCCESS(f'[OK] Alumno: {alumno.get_full_name()} ({alumno.codigo}) / Pedro1415@'))
             else:
                 alumno = Usuario.objects.get(numero_documento=dni_num)
                 alumnos.append(alumno)
                 self.stdout.write(self.style.WARNING(f'Alumno {alumno.codigo} ya existe'))
 
-        today = date.today()
-        if not Ciclo.objects.filter(nombre='2025-1').exists():
-            ciclo = Ciclo.objects.create(
-                nombre='2025-1',
-                fecha_inicio_matricula=today - timedelta(days=15),
-                fecha_fin_matricula=today + timedelta(days=30),
-                matricula_abierta=True
-            )
-            self.stdout.write(self.style.SUCCESS(f'[OK] Ciclo: {ciclo.nombre}'))
-        else:
-            ciclo = Ciclo.objects.get(nombre='2025-1')
-            self.stdout.write(self.style.WARNING(f'Ciclo {ciclo.nombre} ya existe'))
+        # ============================================
+        # CICLOS
+        # ============================================
 
+        # Ciclo 2025-1 (TERMINADO)
+        if not Ciclo.objects.filter(nombre='2025-1').exists():
+            ciclo_2025_1 = Ciclo.objects.create(
+                nombre='2025-1',
+                fecha_inicio_ciclo=date(2025, 3, 1),
+                fecha_fin_ciclo=date(2025, 6, 28),
+                fecha_inicio_matricula=date(2025, 2, 15),
+                fecha_fin_matricula=date(2025, 3, 7),
+                matricula_abierta=False,
+                ciclo_terminado=True
+            )
+            self.stdout.write(self.style.SUCCESS(f'[OK] Ciclo: {ciclo_2025_1.nombre} (TERMINADO)'))
+        else:
+            ciclo_2025_1 = Ciclo.objects.get(nombre='2025-1')
+            self.stdout.write(self.style.WARNING(f'Ciclo {ciclo_2025_1.nombre} ya existe'))
+
+        # Ciclo 2025-2 (ACTIVO)
+        if not Ciclo.objects.filter(nombre='2025-2').exists():
+            ciclo_2025_2 = Ciclo.objects.create(
+                nombre='2025-2',
+                fecha_inicio_ciclo=date(2025, 8, 12),
+                fecha_fin_ciclo=date(2025, 12, 20),
+                fecha_inicio_matricula=date(2025, 7, 29),
+                fecha_fin_matricula=date(2025, 12, 30),  # Matrícula abierta
+                matricula_abierta=True,
+                ciclo_terminado=False
+            )
+            self.stdout.write(self.style.SUCCESS(f'[OK] Ciclo: {ciclo_2025_2.nombre} (ACTIVO - Matrícula abierta)'))
+        else:
+            ciclo_2025_2 = Ciclo.objects.get(nombre='2025-2')
+            self.stdout.write(self.style.WARNING(f'Ciclo {ciclo_2025_2.nombre} ya existe'))
+
+        # ============================================
+        # CURSOS
+        # ============================================
         cursos_data = [
-            {'nombre': 'Redes y comunicación de datos I', 'creditos': 4, 'codigo': '1I41N'},
-            {'nombre': 'Algoritmos y estructuras de datos', 'creditos': 3, 'codigo': '1I53N'},
-            {'nombre': 'Taller de programación web', 'creditos': 2, 'codigo': '1SI45'},
             {'nombre': 'Base de datos II', 'creditos': 4, 'codigo': '1SI46'},
-            {'nombre': 'Diseño de patrones', 'creditos': 2, 'codigo': '1SI47'},
-            {'nombre': 'Negociación y narrativa', 'creditos': 2, 'codigo': '1S76T'},
-            {'nombre': 'Sistemas operativos', 'creditos': 3, 'codigo': '1TV74'}
+            {'nombre': 'Programación orientada a objetos', 'creditos': 3, 'codigo': '1I55N'}
         ]
 
-        cursos = []
+        cursos = {}
         for curso_data in cursos_data:
-            if not Curso.objects.filter(nombre=curso_data['nombre']).exists():
+            if not Curso.objects.filter(codigo=curso_data['codigo']).exists():
                 curso = Curso.objects.create(
                     nombre=curso_data['nombre'],
                     creditos=curso_data['creditos'],
                     descripcion=f"Curso {curso_data['codigo']}"
                 )
-                cursos.append(curso)
+                cursos[curso_data['codigo']] = curso
                 self.stdout.write(self.style.SUCCESS(f'[OK] Curso: {curso.nombre}'))
             else:
-                curso = Curso.objects.get(nombre=curso_data['nombre'])
-                cursos.append(curso)
+                curso = Curso.objects.get(codigo=curso_data['codigo'])
+                cursos[curso_data['codigo']] = curso
                 self.stdout.write(self.style.WARNING(f'Curso {curso.nombre} ya existe'))
 
-        componentes_por_curso = [
-            # Redes y comunicación de datos I
-            [
-                ('Practica calificada 1 (PC1)', Decimal('20.00')),
-                ('Practica calificada 2 (PC2)', Decimal('20.00')),
-                ('Practica calificada 3 (PC3)', Decimal('20.00')),
-                ('Participacion en clase (PA)', Decimal('10.00')),
-                ('Examen final (EXFN)', Decimal('30.00'))
-            ],
-            # Algoritmos y estructuras de datos
-            [
-                ('Practica calificada 1 (PC1)', Decimal('20.00')),
-                ('Practica calificada 2 (PC2)', Decimal('20.00')),
-                ('Practica calificada 3 (PC3)', Decimal('20.00')),
-                ('Trabajo final (TF)', Decimal('40.00'))
-            ],
-            # Taller de programación web
-            [
-                ('Avance de proyecto final 1 (APF1)', Decimal('20.00')),
-                ('Avance de proyecto final 2 (APF2)', Decimal('20.00')),
-                ('Avance de proyecto final 3 (APF3)', Decimal('20.00')),
-                ('Proyecto final (PROY)', Decimal('40.00'))
-            ],
-            # Base de datos II
-            [
-                ('Practica calificada 1 (PC1)', Decimal('20.00')),
-                ('Practica calificada 2 (PC2)', Decimal('20.00')),
-                ('Practica calificada 3 (PC3)', Decimal('20.00')),
-                ('Trabajo final (TF)', Decimal('40.00'))
-            ],
-            # Diseño de patrones
-            [
-                ('Practica calificada 1 (PC1)', Decimal('20.00')),
-                ('Practica calificada 2 (PC2)', Decimal('20.00')),
-                ('Practica calificada 3 (PC3)', Decimal('20.00')),
-                ('Participacion en clase (PA)', Decimal('10.00')),
-                ('Examen final (EXFN)', Decimal('30.00'))
-            ],
-            # Negociación y narrativa
-            [
-                ('Tarea academica 1 (TA1)', Decimal('30.00')),
-                ('Tarea academica 2 (TA2)', Decimal('30.00')),
-                ('Examen final (EXFN)', Decimal('40.00'))
-            ],
-            # Sistemas operativos
-            [
-                ('Practica calificada 1 (PC1)', Decimal('20.00')),
-                ('Practica calificada 2 (PC2)', Decimal('20.00')),
-                ('Practica calificada 3 (PC3)', Decimal('20.00')),
-                ('Participacion en clase (PA)', Decimal('10.00')),
-                ('Examen final (EXFN)', Decimal('30.00'))
+        # ============================================
+        # COMPONENTES DE EVALUACIÓN
+        # ============================================
+
+        # Base de datos II
+        if not ComponenteEvaluacion.objects.filter(curso=cursos['1SI46']).exists():
+            componentes_bd = [
+                ComponenteEvaluacion(curso=cursos['1SI46'], nombre='Práctica calificada 1 (PC1)', porcentaje=Decimal('15.00'), orden=1),
+                ComponenteEvaluacion(curso=cursos['1SI46'], nombre='Práctica calificada 2 (PC2)', porcentaje=Decimal('20.00'), orden=2),
+                ComponenteEvaluacion(curso=cursos['1SI46'], nombre='Práctica calificada 3 (PC3)', porcentaje=Decimal('18.00'), orden=3),
+                ComponenteEvaluacion(curso=cursos['1SI46'], nombre='Participación en clase (PA)', porcentaje=Decimal('20.00'), orden=4),
+                ComponenteEvaluacion(curso=cursos['1SI46'], nombre='Examen final (EXFN)', porcentaje=Decimal('19.00'), orden=5),
             ]
-        ]
+            ComponenteEvaluacion.objects.bulk_create(componentes_bd)
+            self.stdout.write(self.style.SUCCESS(f'[OK] Componentes para Base de datos II'))
+        else:
+            self.stdout.write(self.style.WARNING('Componentes de Base de datos II ya existen'))
 
-        for i, curso in enumerate(cursos):
-            if not ComponenteEvaluacion.objects.filter(curso=curso).exists():
-                componentes = []
-                for orden, (nombre, porcentaje) in enumerate(componentes_por_curso[i], 1):
-                    componentes.append(ComponenteEvaluacion(
-                        curso=curso,
-                        nombre=nombre,
-                        porcentaje=porcentaje,
-                        orden=orden
-                    ))
-                ComponenteEvaluacion.objects.bulk_create(componentes)
-                self.stdout.write(self.style.SUCCESS(f'[OK] Componentes para {curso.nombre}'))
-            else:
-                self.stdout.write(self.style.WARNING(f'Componentes de {curso.nombre} ya existen'))
+        # Programación orientada a objetos
+        if not ComponenteEvaluacion.objects.filter(curso=cursos['1I55N']).exists():
+            componentes_poo = [
+                ComponenteEvaluacion(curso=cursos['1I55N'], nombre='Práctica calificada 1 (PC1)', porcentaje=Decimal('19.00'), orden=1),
+                ComponenteEvaluacion(curso=cursos['1I55N'], nombre='Práctica calificada 2 (PC2)', porcentaje=Decimal('20.00'), orden=2),
+                ComponenteEvaluacion(curso=cursos['1I55N'], nombre='Práctica calificada 3 (PC3)', porcentaje=Decimal('20.00'), orden=3),
+                ComponenteEvaluacion(curso=cursos['1I55N'], nombre='Proyecto final (PROY)', porcentaje=Decimal('20.00'), orden=4),
+            ]
+            ComponenteEvaluacion.objects.bulk_create(componentes_poo)
+            self.stdout.write(self.style.SUCCESS(f'[OK] Componentes para Programación orientada a objetos'))
+        else:
+            self.stdout.write(self.style.WARNING('Componentes de Programación orientada a objetos ya existen'))
 
-        # Configuración de secciones:
-        # profesores[0] = Nahui Xesppe
-        # profesores[1] = Rayme Serrano
-        # profesores[2] = Ecmias Fernandez
-        # profesores[3] = Miguel Angel Farfan
+        # ============================================
+        # SECCIONES
+        # ============================================
 
-        secciones_config = [
-            # Diseño de patrones - 3 secciones (curso_idx = 4)
-            {'curso_idx': 4, 'codigo': '16309', 'profesor_idx': 3, 'dias': 'Sábado 15:45-18:00', 'hora_inicio': time(15, 45), 'hora_fin': time(18, 0), 'modalidad': 'presencial', 'turno': 'tarde'},
-            {'curso_idx': 4, 'codigo': '16310', 'profesor_idx': 1, 'dias': 'Martes 18:30-20:00', 'hora_inicio': time(18, 30), 'hora_fin': time(20, 0), 'modalidad': 'presencial', 'turno': 'noche'},
-            {'curso_idx': 4, 'codigo': '16311', 'profesor_idx': 2, 'dias': 'Jueves 20:15-21:45', 'hora_inicio': time(20, 15), 'hora_fin': time(21, 45), 'modalidad': 'presencial', 'turno': 'noche'},
+        # profesores[0] = Miguel Angel Farfan
+        # profesores[1] = Ecmias Fernandez
+        # profesores[2] = Adrian Arce Holgado
 
-            # Taller de programación web - 1 sección (curso_idx = 2)
-            {'curso_idx': 2, 'codigo': '28531', 'profesor_idx': 3, 'dias': 'Jueves 11:00-13:15', 'hora_inicio': time(11, 0), 'hora_fin': time(13, 15), 'modalidad': 'presencial', 'turno': 'mañana'},
+        # CICLO 2025-1 (TERMINADO)
+        # Base de datos II - Arce Holgado
+        if not Seccion.objects.filter(codigo='44334', curso=cursos['1SI46'], ciclo=ciclo_2025_1).exists():
+            seccion_bd_2025_1 = Seccion.objects.create(
+                codigo='44334',
+                curso=cursos['1SI46'],
+                ciclo=ciclo_2025_1,
+                modalidad='presencial',
+                turno='noche',
+                dias_semana='Miércoles 18:30-20:00, Jueves 18:30-20:00',
+                hora_inicio=time(18, 30),
+                hora_fin=time(20, 0),
+                vacantes_totales=30,
+                vacantes_ocupadas=0
+            )
+            seccion_bd_2025_1.profesores.add(profesores[2])  # Arce Holgado
+            self.stdout.write(self.style.SUCCESS(f'[OK] Sección 2025-1: Base de datos II - {profesores[2].get_full_name()}'))
+        else:
+            seccion_bd_2025_1 = Seccion.objects.get(codigo='44334', curso=cursos['1SI46'], ciclo=ciclo_2025_1)
+            self.stdout.write(self.style.WARNING('Sección 44334 ya existe'))
 
-            # Algoritmos y estructuras de datos - 2 secciones (curso_idx = 1)
-            {'curso_idx': 1, 'codigo': '16305', 'profesor_idx': 3, 'dias': 'Lunes 08:00-10:15', 'hora_inicio': time(8, 0), 'hora_fin': time(10, 15), 'modalidad': 'presencial', 'turno': 'mañana'},
-            {'curso_idx': 1, 'codigo': '16306', 'profesor_idx': 2, 'dias': 'Miércoles 18:30-20:45', 'hora_inicio': time(18, 30), 'hora_fin': time(20, 45), 'modalidad': 'presencial', 'turno': 'noche'},
+        # Programación orientada a objetos - Farfan
+        if not Seccion.objects.filter(codigo='44337', curso=cursos['1I55N'], ciclo=ciclo_2025_1).exists():
+            seccion_poo_2025_1 = Seccion.objects.create(
+                codigo='44337',
+                curso=cursos['1I55N'],
+                ciclo=ciclo_2025_1,
+                modalidad='presencial',
+                turno='noche',
+                dias_semana='Martes 18:30-20:00, Jueves 18:30-20:00',
+                hora_inicio=time(18, 30),
+                hora_fin=time(20, 0),
+                vacantes_totales=30,
+                vacantes_ocupadas=0
+            )
+            seccion_poo_2025_1.profesores.add(profesores[0])  # Farfan
+            self.stdout.write(self.style.SUCCESS(f'[OK] Sección 2025-1: Programación orientada a objetos - {profesores[0].get_full_name()}'))
+        else:
+            seccion_poo_2025_1 = Seccion.objects.get(codigo='44337', curso=cursos['1I55N'], ciclo=ciclo_2025_1)
+            self.stdout.write(self.style.WARNING('Sección 44337 ya existe'))
 
-            # Redes y comunicación de datos I - 1 sección (curso_idx = 0)
-            {'curso_idx': 0, 'codigo': '11366', 'profesor_idx': 0, 'dias': 'Lunes 20:15-21:45, Miércoles 20:15-21:45', 'hora_inicio': time(20, 15), 'hora_fin': time(21, 45), 'modalidad': 'presencial', 'turno': 'noche'}
-        ]
+        # CICLO 2025-2 (ACTIVO)
+        # Base de datos II - Ecmias
+        if not Seccion.objects.filter(codigo='16307', curso=cursos['1SI46'], ciclo=ciclo_2025_2).exists():
+            seccion_bd_2025_2 = Seccion.objects.create(
+                codigo='16307',
+                curso=cursos['1SI46'],
+                ciclo=ciclo_2025_2,
+                modalidad='presencial',
+                turno='noche',
+                dias_semana='Miércoles 18:30-20:00, Jueves 18:30-20:00',
+                hora_inicio=time(18, 30),
+                hora_fin=time(20, 0),
+                vacantes_totales=30,
+                vacantes_ocupadas=0
+            )
+            seccion_bd_2025_2.profesores.add(profesores[1])  # Ecmias
+            self.stdout.write(self.style.SUCCESS(f'[OK] Sección 2025-2: Base de datos II - {profesores[1].get_full_name()} (DISPONIBLE PARA MATRÍCULA)'))
+        else:
+            seccion_bd_2025_2 = Seccion.objects.get(codigo='16307', curso=cursos['1SI46'], ciclo=ciclo_2025_2)
+            self.stdout.write(self.style.WARNING('Sección 16307 ya existe'))
 
-        secciones = []
-        for seccion_data in secciones_config:
-            curso = cursos[seccion_data['curso_idx']]
-            codigo = seccion_data['codigo']
+        # ============================================
+        # MATRÍCULAS Y NOTAS - CICLO 2025-1
+        # ============================================
 
-            if not Seccion.objects.filter(codigo=codigo, curso=curso, ciclo=ciclo).exists():
-                seccion = Seccion.objects.create(
-                    codigo=codigo,
-                    curso=curso,
-                    ciclo=ciclo,
-                    modalidad=seccion_data['modalidad'],
-                    turno=seccion_data['turno'],
-                    dias_semana=seccion_data['dias'],
-                    hora_inicio=seccion_data['hora_inicio'],
-                    hora_fin=seccion_data['hora_fin'],
-                    vacantes_totales=30,
-                    vacantes_ocupadas=0
-                )
+        kelvin = alumnos[0]
 
-                profesor = profesores[seccion_data['profesor_idx']]
-                seccion.profesores.add(profesor)
-                secciones.append(seccion)
+        # Matricular Kelvin en Base de datos II (2025-1)
+        if not Matricula.objects.filter(alumno=kelvin, seccion=seccion_bd_2025_1).exists():
+            try:
+                matricula_bd = MatriculaService.matricular_alumno(kelvin.id, seccion_bd_2025_1.id)
+                self.stdout.write(self.style.SUCCESS(f'[OK] {kelvin.get_full_name()} matriculado en Base de datos II (2025-1)'))
 
-                self.stdout.write(self.style.SUCCESS(f'[OK] Sección: {seccion.codigo} - {curso.nombre} (Prof: {profesor.get_full_name()})'))
-            else:
-                seccion = Seccion.objects.get(codigo=codigo, curso=curso, ciclo=ciclo)
-                secciones.append(seccion)
-                self.stdout.write(self.style.WARNING(f'Sección {seccion.codigo} ya existe'))
+                # Registrar notas DESAPROBADAS
+                componentes_bd = ComponenteEvaluacion.objects.filter(curso=cursos['1SI46']).order_by('orden')
+                notas_desaprobadas = [
+                    Decimal('7.50'),   # PC1 (15%)
+                    Decimal('8.00'),   # PC2 (20%)
+                    Decimal('9.50'),   # PC3 (18%)
+                    Decimal('10.00'),  # PA (20%)
+                    Decimal('6.50'),   # EXFN (19%)
+                ]
 
-        # Matricular alumnos excepto Juan (índice 0) y Kelvin (índice 1)
-        # Angel: índice 2, Joel: índice 3
+                for comp, nota_valor in zip(componentes_bd, notas_desaprobadas):
+                    NotaService.registrar_nota(matricula_bd.id, comp.id, nota_valor)
 
-        # Matrícula de Angel - una sección por curso
-        matriculas_angel = [
-            {'curso_idx': 4, 'seccion_codigo': '16309'},  # Diseño patrones con Farfan (sábado)
-            {'curso_idx': 2, 'seccion_codigo': '28531'},  # Taller web con Farfan
-            {'curso_idx': 1, 'seccion_codigo': '16305'},  # Algoritmos con Farfan (lunes)
-            {'curso_idx': 0, 'seccion_codigo': '11366'}   # Redes con Nahui
-        ]
+                self.stdout.write(self.style.SUCCESS(f'[OK] Notas DESAPROBADAS registradas para {kelvin.get_full_name()} en Base de datos II'))
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f'Error: {str(e)}'))
 
-        # Matrícula de Joel - una sección por curso (diferentes a Angel donde haya opciones)
-        matriculas_joel = [
-            {'curso_idx': 4, 'seccion_codigo': '16310'},  # Diseño patrones con Rayme (martes)
-            {'curso_idx': 2, 'seccion_codigo': '28531'},  # Taller web con Farfan
-            {'curso_idx': 1, 'seccion_codigo': '16306'},  # Algoritmos con Ecmias (miércoles)
-            {'curso_idx': 0, 'seccion_codigo': '11366'}   # Redes con Nahui
-        ]
+        # Matricular Kelvin en Programación orientada a objetos (2025-1)
+        if not Matricula.objects.filter(alumno=kelvin, seccion=seccion_poo_2025_1).exists():
+            try:
+                matricula_poo = MatriculaService.matricular_alumno(kelvin.id, seccion_poo_2025_1.id)
+                self.stdout.write(self.style.SUCCESS(f'[OK] {kelvin.get_full_name()} matriculado en Programación orientada a objetos (2025-1)'))
 
-        # Matricular Angel
-        for matricula_data in matriculas_angel:
-            curso = cursos[matricula_data['curso_idx']]
-            seccion = Seccion.objects.get(codigo=matricula_data['seccion_codigo'], curso=curso, ciclo=ciclo)
-            if not Matricula.objects.filter(alumno=alumnos[2], seccion=seccion).exists():
-                try:
-                    MatriculaService.matricular_alumno(alumnos[2].id, seccion.id)
-                    self.stdout.write(self.style.SUCCESS(f'[OK] {alumnos[2].get_full_name()} matriculado en {seccion.curso.nombre} - {seccion.codigo}'))
-                except Exception as e:
-                    self.stdout.write(self.style.ERROR(f'Error: {str(e)}'))
+                # Registrar notas variadas
+                componentes_poo = ComponenteEvaluacion.objects.filter(curso=cursos['1I55N']).order_by('orden')
+                notas_variadas = [
+                    Decimal('19.00'),  # PC1 (19%)
+                    Decimal('20.00'),  # PC2 (20%)
+                    Decimal('20.00'),  # PC3 (20%)
+                    Decimal('14.00'),  # PROY (20%) - pendiente
+                ]
 
-        # Matricular Joel
-        for matricula_data in matriculas_joel:
-            curso = cursos[matricula_data['curso_idx']]
-            seccion = Seccion.objects.get(codigo=matricula_data['seccion_codigo'], curso=curso, ciclo=ciclo)
-            if not Matricula.objects.filter(alumno=alumnos[3], seccion=seccion).exists():
-                try:
-                    MatriculaService.matricular_alumno(alumnos[3].id, seccion.id)
-                    self.stdout.write(self.style.SUCCESS(f'[OK] {alumnos[3].get_full_name()} matriculado en {seccion.curso.nombre} - {seccion.codigo}'))
-                except Exception as e:
-                    self.stdout.write(self.style.ERROR(f'Error: {str(e)}'))
+                for comp, nota_valor in zip(componentes_poo, notas_variadas):
+                    NotaService.registrar_nota(matricula_poo.id, comp.id, nota_valor)
 
-        self.stdout.write(self.style.SUCCESS(f'\n[INFO] Juan y Kelvin NO fueron matriculados (para demostración de flujo de matrícula)'))
+                self.stdout.write(self.style.SUCCESS(f'[OK] Notas variadas registradas para {kelvin.get_full_name()} en Programación orientada a objetos'))
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(f'Error: {str(e)}'))
 
+        # ============================================
+        # RESUMEN FINAL
+        # ============================================
         self.stdout.write(self.style.SUCCESS('\n========================================'))
-        self.stdout.write(self.style.SUCCESS('✓ Datos creados exitosamente!'))
+        self.stdout.write(self.style.SUCCESS('Datos creados exitosamente!'))
         self.stdout.write(self.style.SUCCESS('========================================'))
         self.stdout.write(self.style.SUCCESS('\nCredenciales (Usuario/Password):'))
         self.stdout.write(self.style.SUCCESS(f'  Admin: 75911772 / Pedro1415@'))
-        self.stdout.write(self.style.SUCCESS(f'  Profesor Nahui: 41523678 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Profesor Farfan: 44856901 / Pedro1415@'))
-        self.stdout.write(self.style.SUCCESS(f'  Alumno Juan (sin matrícula): 72365087 / Pedro1415@'))
-        self.stdout.write(self.style.SUCCESS(f'  Alumno Angel (matriculado): 74317595 / Pedro1415@'))
-        self.stdout.write(self.style.SUCCESS('\nCursos con secciones disponibles:'))
-        self.stdout.write(self.style.SUCCESS('  - Diseño de patrones (3 secciones)'))
-        self.stdout.write(self.style.SUCCESS('  - Taller de programación web (1 sección)'))
-        self.stdout.write(self.style.SUCCESS('  - Algoritmos y estructuras de datos (2 secciones)'))
-        self.stdout.write(self.style.SUCCESS('  - Redes y comunicación de datos I (1 sección)'))
-        self.stdout.write(self.style.SUCCESS('\nCursos sin secciones (en sistema pero no matriculables):'))
-        self.stdout.write(self.style.SUCCESS('  - Base de datos II'))
-        self.stdout.write(self.style.SUCCESS('  - Negociación y narrativa'))
-        self.stdout.write(self.style.SUCCESS('  - Sistemas operativos'))
+        self.stdout.write(self.style.SUCCESS(f'  Profesor Ecmias: 43745890 / Pedro1415@'))
+        self.stdout.write(self.style.SUCCESS(f'  Profesor Arce: 45967823 / Pedro1415@'))
+        self.stdout.write(self.style.SUCCESS(f'  Alumno Kelvin: 73309801 / Pedro1415@'))
+
+        self.stdout.write(self.style.SUCCESS('\nCICLO 2025-1 (TERMINADO - Solo lectura):'))
+        self.stdout.write(self.style.SUCCESS('  - Base de datos II (Arce Holgado) - Kelvin DESAPROBADO'))
+        self.stdout.write(self.style.SUCCESS('  - Programación orientada a objetos (Farfan) - Kelvin con notas'))
+
+        self.stdout.write(self.style.SUCCESS('\nCICLO 2025-2 (ACTIVO - Matrícula abierta):'))
+        self.stdout.write(self.style.SUCCESS('  - Base de datos II (Ecmias) - Sin matrículas'))
+
         self.stdout.write(self.style.SUCCESS('\nAccede a: http://localhost:8000'))

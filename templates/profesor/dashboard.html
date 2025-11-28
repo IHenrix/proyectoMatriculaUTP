@@ -4,10 +4,42 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto">
-    
+
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Mis Secciones</h1>
-        <p class="mt-2 text-sm text-gray-600">Gestiona las secciones asignadas, registra notas y visualiza estadísticas</p>
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Mis Secciones</h1>
+                <p class="mt-2 text-sm text-gray-600">Gestiona las secciones asignadas, registra notas y visualiza estadísticas</p>
+            </div>
+
+            {% if ciclos_disponibles %}
+            <div class="flex items-center">
+                <label for="ciclo-selector" class="text-sm font-medium text-gray-700 mr-3">
+                    <i class="fas fa-calendar-alt mr-1"></i>
+                    Ciclo:
+                </label>
+                <select id="ciclo-selector" onchange="cambiarCiclo(this.value)" class="block w-48 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md shadow-sm">
+                    {% for ciclo in ciclos_disponibles %}
+                    <option value="{{ ciclo.id }}" {% if ciclo_seleccionado and ciclo.id == ciclo_seleccionado.id %}selected{% endif %}>
+                        {{ ciclo.nombre }}
+                        {% if ciclo.ciclo_terminado %}
+                        <i class="fas fa-lock"></i> (Terminado)
+                        {% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if ciclo_seleccionado and ciclo_seleccionado.ciclo_terminado %}
+        <div class="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <div class="flex items-center text-sm text-yellow-800">
+                <i class="fas fa-lock mr-2"></i>
+                <span>El ciclo <strong>{{ ciclo_seleccionado.nombre }}</strong> ha finalizado. Las notas están en modo lectura.</span>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     {% if secciones %}
@@ -116,6 +148,13 @@
 </div>
 
 <script>
+// Cambiar ciclo y recargar la página con el filtro
+function cambiarCiclo(cicloId) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('ciclo_id', cicloId);
+    window.location.href = url.toString();
+}
+
 // Agregar iconos dinámicos según modalidad y turno
 document.addEventListener('DOMContentLoaded', function() {
     // Los iconos se manejan desde el backend con métodos del modelo

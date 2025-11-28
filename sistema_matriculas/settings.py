@@ -60,6 +60,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'academic_system.context_processors.university_context',  # Context processor personalizado
+                'academic_system.context_processors.matricula_context',  # Context processor de matrícula
             ],
         },
     },

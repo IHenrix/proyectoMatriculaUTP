@@ -4,42 +4,39 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto">
-    
+
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">Mi Panel de Estudiante</h1>
         <p class="mt-2 text-sm text-gray-600">Bienvenido, {{ user.get_full_name }}</p>
     </div>
 
-    
+
     {% if ciclo_activo %}
     <div class="bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg shadow-lg p-6 mb-8 text-white">
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-2xl font-bold">{{ ciclo_activo.nombre }}</h2>
+                {% if ciclo_activo.puede_matricularse %}
                 <p class="text-primary-100 mt-2">
                     <i class="fas fa-calendar mr-2"></i>
                     Matrícula: {{ ciclo_activo.fecha_inicio_matricula|date:"d/m/Y" }} - {{ ciclo_activo.fecha_fin_matricula|date:"d/m/Y" }}
                 </p>
+                {% endif %}
             </div>
+            {% if ciclo_activo.puede_matricularse %}
             <div class="text-right">
-                {% if ciclo_activo.puede_matricularse %}
                 <span class="inline-flex items-center px-4 py-2 bg-green-500 rounded-full text-sm font-medium">
                     <i class="fas fa-check-circle mr-2"></i>
                     Matrícula Abierta
                 </span>
-                {% else %}
-                <span class="inline-flex items-center px-4 py-2 bg-yellow-500 rounded-full text-sm font-medium">
-                    <i class="fas fa-lock mr-2"></i>
-                    Matrícula Cerrada
-                </span>
-                {% endif %}
             </div>
+            {% endif %}
         </div>
     </div>
 
-    
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-3 mb-8">
-        
+
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+
         <div class="bg-white overflow-hidden shadow-lg rounded-lg">
             <div class="p-5">
                 <div class="flex items-center">
@@ -58,7 +55,28 @@
             </div>
         </div>
 
-        
+
+        <div class="bg-white overflow-hidden shadow-lg rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Promedio General</dt>
+                            <dd class="text-2xl font-bold {% if promedio_general %}{% if promedio_general >= 11.6 %}text-green-600{% else %}text-red-600{% endif %}{% else %}text-gray-900{% endif %}">
+                                {% if promedio_general %}{{ promedio_general|floatformat:2 }}{% else %}--{% endif %}
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
         <div class="bg-white overflow-hidden shadow-lg rounded-lg">
             <div class="p-5">
                 <div class="flex items-center">
@@ -69,7 +87,7 @@
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Créditos Totales</dt>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Créditos</dt>
                             <dd class="text-2xl font-bold text-gray-900">{{ creditos_totales }}</dd>
                         </dl>
                     </div>
@@ -77,19 +95,19 @@
             </div>
         </div>
 
-        
+
         <div class="bg-white overflow-hidden shadow-lg rounded-lg">
             <div class="p-5">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="h-12 w-12 bg-primary-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-user-graduate text-primary-600 text-xl"></i>
+                        <div class="h-12 w-12 bg-amber-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-check-double text-amber-600 text-xl"></i>
                         </div>
                     </div>
                     <div class="ml-5 w-0 flex-1">
                         <dl>
-                            <dt class="text-sm font-medium text-gray-500 truncate">Estado</dt>
-                            <dd class="text-lg font-bold text-green-600">Activo</dd>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Aprobados</dt>
+                            <dd class="text-2xl font-bold text-green-600">{{ cursos_aprobados }}/{{ matriculas|length }}</dd>
                         </dl>
                     </div>
                 </div>
@@ -97,9 +115,10 @@
         </div>
     </div>
 
-    
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-8">
-        
+
+    <div class="grid grid-cols-1 gap-6 {% if ciclo_activo.puede_matricularse %}sm:grid-cols-2{% endif %} mb-8">
+
+        {% if ciclo_activo.puede_matricularse %}
         <a href="{% url 'alumno_matricula' %}" class="block bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -107,18 +126,13 @@
                 </div>
                 <div class="ml-4">
                     <h3 class="text-lg font-medium text-gray-900">Matricularme</h3>
-                    <p class="text-sm text-gray-500 mt-1">
-                        {% if ciclo_activo.puede_matricularse %}
-                        Ver secciones disponibles y matricularte
-                        {% else %}
-                        Periodo de matrícula cerrado
-                        {% endif %}
-                    </p>
+                    <p class="text-sm text-gray-500 mt-1">Ver secciones disponibles y matricularte</p>
                 </div>
             </div>
         </a>
+        {% endif %}
 
-        
+
         <a href="{% url 'alumno_mis_cursos' %}" class="block bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
             <div class="flex items-center">
                 <div class="flex-shrink-0">
@@ -132,43 +146,162 @@
         </a>
     </div>
 
-    
-    {% if matriculas %}
+
+    {% if cursos_data %}
     <div class="mb-8">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Mis Cursos - {{ ciclo_activo.nombre }}</h2>
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {% for matricula in matriculas %}
-            <div class="bg-white rounded-lg shadow hover:shadow-lg transition p-5">
-                <div class="flex items-start justify-between">
-                    <div class="flex-1">
-                        <h3 class="text-lg font-semibold text-gray-900">{{ matricula.seccion.curso.nombre }}</h3>
-                        <p class="text-sm text-gray-500 mt-1">{{ matricula.seccion.codigo }}</p>
-                    </div>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                        {{ matricula.seccion.curso.creditos }} créditos
-                    </span>
+        <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+            <i class="fas fa-books text-primary-600 mr-2"></i>
+            Mis Cursos Actuales
+        </h2>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {% for curso in cursos_data %}
+            <div class="bg-white rounded-lg shadow-lg hover:shadow-xl transition-all overflow-hidden">
+
+                <div class="bg-gradient-to-r {% if curso.promedio %}{% if curso.promedio >= 11.6 %}from-green-500 to-green-600{% elif curso.promedio >= 8 %}from-yellow-500 to-yellow-600{% else %}from-red-500 to-red-600{% endif %}{% else %}from-gray-400 to-gray-500{% endif %} p-4 text-white">
+                    <h3 class="font-bold text-lg leading-tight">{{ curso.matricula.seccion.curso.nombre }}</h3>
+                    <p class="text-sm opacity-90 mt-1">{{ curso.matricula.seccion.codigo }}</p>
                 </div>
-                <div class="mt-4 grid grid-cols-2 gap-3">
-                    <div class="text-sm text-gray-600">
-                        <i class="fas fa-{{ matricula.seccion.get_modalidad_icon }} text-primary-600 mr-1"></i>
-                        {{ matricula.seccion.get_modalidad_display }}
+
+
+                <div class="p-5">
+
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">Promedio Actual</p>
+                            <p class="text-3xl font-bold {% if curso.promedio %}{% if curso.promedio >= 11.6 %}text-green-600{% else %}text-red-600{% endif %}{% else %}text-gray-400{% endif %}">
+                                {% if curso.promedio %}{{ curso.promedio|floatformat:2 }}{% else %}--{% endif %}
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            {% if curso.estado == 'APROBADO' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                Aprobando
+                            </span>
+                            {% elif curso.estado == 'DESAPROBADO' %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                En Riesgo
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800">
+                                <i class="fas fa-clock mr-1"></i>
+                                Pendiente
+                            </span>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div class="text-sm text-gray-600">
-                        <i class="fas fa-{{ matricula.seccion.get_turno_icon }} text-primary-600 mr-1"></i>
-                        {{ matricula.seccion.get_turno_display }}
+
+
+                    <div class="space-y-2 mb-4">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-graduation-cap text-primary-600 mr-2 w-5"></i>
+                            <span>{{ curso.matricula.seccion.curso.creditos }} créditos</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-{{ curso.matricula.seccion.get_modalidad_icon }} text-blue-600 mr-2 w-5"></i>
+                            <span>{{ curso.matricula.seccion.get_modalidad_display }}</span>
+                        </div>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-clipboard-list text-green-600 mr-2 w-5"></i>
+                            <span>{{ curso.total_notas }}/{{ curso.total_componentes }} notas</span>
+                        </div>
                     </div>
+
+
+                    {% if curso.ultima_nota %}
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-3 mb-3">
+                        <p class="text-xs text-blue-700 font-medium mb-1">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Última nota registrada
+                        </p>
+                        <p class="text-sm text-blue-900">
+                            <span class="font-bold">{{ curso.ultima_nota.componente.nombre }}:</span>
+                            <span class="font-bold text-lg">{{ curso.ultima_nota.valor|floatformat:2 }}</span>
+                        </p>
+                    </div>
+                    {% endif %}
+
+
+                    <a href="{% url 'alumno_mis_cursos' %}" class="block w-full text-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition">
+                        <i class="fas fa-eye mr-2"></i>
+                        Ver Detalles
+                    </a>
                 </div>
-                {% if matricula.seccion.horario %}
-                <div class="mt-3 text-sm text-gray-600 bg-gray-50 rounded p-2">
-                    <i class="fas fa-clock text-gray-400 mr-1"></i>
-                    {{ matricula.seccion.horario }}
-                </div>
-                {% endif %}
             </div>
             {% endfor %}
         </div>
     </div>
+
+
+    {% if promedio_general %}
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+            <i class="fas fa-chart-bar text-primary-600 mr-2"></i>
+            Rendimiento Académico
+        </h2>
+        <div class="mb-6">
+            <canvas id="rendimientoChart" class="w-full" style="max-height: 400px;"></canvas>
+        </div>
+
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                <i class="fas fa-trophy text-green-600 text-2xl mb-2"></i>
+                <p class="text-sm text-gray-600 mb-1">Mejor Nota</p>
+                <p class="text-2xl font-bold text-green-600">{% if mejor_nota %}{{ mejor_nota|floatformat:2 }}{% else %}--{% endif %}</p>
+            </div>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                <i class="fas fa-chart-line text-blue-600 text-2xl mb-2"></i>
+                <p class="text-sm text-gray-600 mb-1">Promedio General</p>
+                <p class="text-2xl font-bold text-blue-600">{{ promedio_general|floatformat:2 }}</p>
+            </div>
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+                <i class="fas fa-exclamation-triangle text-amber-600 text-2xl mb-2"></i>
+                <p class="text-sm text-gray-600 mb-1">Nota Más Baja</p>
+                <p class="text-2xl font-bold text-amber-600">{% if peor_nota %}{{ peor_nota|floatformat:2 }}{% else %}--{% endif %}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+
+    {% if cursos_desaprobados > 0 or cursos_pendientes > 0 %}
+    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-6 mb-8">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-lightbulb text-amber-500 text-3xl"></i>
+            </div>
+            <div class="ml-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Recomendaciones Académicas
+                </h3>
+                <ul class="space-y-2 text-sm text-gray-700">
+                    {% if cursos_desaprobados > 0 %}
+                    <li class="flex items-start">
+                        <i class="fas fa-exclamation-circle text-red-500 mr-2 mt-1"></i>
+                        <span>Tienes <strong>{{ cursos_desaprobados }} curso(s)</strong> en riesgo. Considera hablar con tus profesores para recibir apoyo.</span>
+                    </li>
+                    {% endif %}
+                    {% if cursos_pendientes > 0 %}
+                    <li class="flex items-start">
+                        <i class="fas fa-clock text-yellow-500 mr-2 mt-1"></i>
+                        <span>Tienes <strong>{{ cursos_pendientes }} curso(s)</strong> con notas pendientes. Mantente al día con tus evaluaciones.</span>
+                    </li>
+                    {% endif %}
+                    <li class="flex items-start">
+                        <i class="fas fa-star text-green-500 mr-2 mt-1"></i>
+                        <span>Revisa constantemente tus notas en <a href="{% url 'alumno_mis_cursos' %}" class="text-primary-600 hover:text-primary-700 font-medium underline">Mis Cursos</a> para dar seguimiento a tu progreso.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     {% else %}
+
     <div class="bg-white rounded-lg shadow-lg p-12 text-center">
         <div class="text-gray-400">
             <i class="fas fa-book-open text-6xl mb-4"></i>
@@ -177,7 +310,7 @@
                 {% if ciclo_activo.puede_matricularse %}
                 El periodo de matrícula está abierto. Matricúlate ahora en las secciones disponibles.
                 {% else %}
-                Espera a que se abra el periodo de matrícula para inscribirte en cursos.
+                No tienes cursos matriculados en este ciclo.
                 {% endif %}
             </p>
             {% if ciclo_activo.puede_matricularse %}
@@ -190,7 +323,7 @@
     </div>
     {% endif %}
     {% else %}
-    
+
     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
         <div class="flex">
             <div class="flex-shrink-0">
@@ -206,4 +339,63 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if promedio_general and cursos_labels %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const ctx = document.getElementById('rendimientoChart');
+    const cursos = {{ cursos_labels|safe }};
+    const promedios = {{ cursos_promedios|safe }};
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: cursos,
+            datasets: [{
+                label: 'Promedio por Curso',
+                data: promedios,
+                backgroundColor: promedios.map(p => p >= 11.6 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'),
+                borderColor: promedios.map(p => p >= 11.6 ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)'),
+                borderWidth: 2,
+                borderRadius: 8,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Promedio: ' + context.parsed.y.toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 20,
+                    ticks: {
+                        stepSize: 2
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
 {% endblock %}

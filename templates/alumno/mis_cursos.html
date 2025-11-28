@@ -5,16 +5,36 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto">
-    
+
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Mis Cursos y Notas</h1>
-        <p class="mt-2 text-sm text-gray-600">
-            {% if ciclo_activo %}
-            Ciclo Actual: {{ ciclo_activo.nombre }}
-            {% else %}
-            Últimos cursos matriculados
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Mis Cursos y Notas</h1>
+                <p class="mt-2 text-sm text-gray-600">
+                    {% if ciclo_seleccionado %}
+                    Ciclo: {{ ciclo_seleccionado.nombre }}
+                    {% else %}
+                    Selecciona un ciclo para ver tus cursos
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if ciclos_disponibles %}
+            <div class="flex items-center">
+                <label for="ciclo-selector" class="text-sm font-medium text-gray-700 mr-3">
+                    <i class="fas fa-calendar-alt mr-1"></i>
+                    Ciclo:
+                </label>
+                <select id="ciclo-selector" onchange="cambiarCiclo(this.value)" class="block w-48 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md shadow-sm">
+                    {% for ciclo in ciclos_disponibles %}
+                    <option value="{{ ciclo.id }}" {% if ciclo_seleccionado and ciclo.id == ciclo_seleccionado.id %}selected{% endif %}>
+                        {{ ciclo.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
             {% endif %}
-        </p>
+        </div>
     </div>
 
     {% if cursos_data %}
@@ -249,18 +269,35 @@
         </div>
     </div>
     {% else %}
-    
+
     <div class="bg-white rounded-lg shadow-lg p-12 text-center">
         <div class="text-gray-400">
             <i class="fas fa-graduation-cap text-6xl mb-4"></i>
             <h3 class="text-xl font-medium text-gray-900 mb-2">No tienes cursos matriculados</h3>
-            <p class="text-gray-500 mb-6">Matricúlate en las secciones disponibles para comenzar a ver tus notas</p>
+            <p class="text-gray-500 mb-6">
+                {% if puede_matricularse %}
+                Matricúlate en las secciones disponibles para comenzar a ver tus notas
+                {% else %}
+                No tienes cursos matriculados en este ciclo.
+                {% endif %}
+            </p>
+            {% if puede_matricularse %}
             <a href="{% url 'alumno_matricula' %}" class="inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-primary-600 hover:bg-primary-700">
                 <i class="fas fa-clipboard-check mr-2"></i>
                 Ir a Matrícula
             </a>
+            {% endif %}
         </div>
     </div>
     {% endif %}
 </div>
+
+<script>
+// Cambiar ciclo y recargar la página con el filtro
+function cambiarCiclo(cicloId) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('ciclo_id', cicloId);
+    window.location.href = url.toString();
+}
+</script>
 {% endblock %}

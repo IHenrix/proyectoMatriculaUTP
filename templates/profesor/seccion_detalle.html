@@ -75,9 +75,19 @@
         </div>
     </div>
 
-    
+
     <div id="content-alumnos" class="tab-content">
-        
+
+        {% if ciclo_terminado %}
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div class="flex items-center">
+                <i class="fas fa-lock text-red-500 mr-3 text-xl"></i>
+                <div class="text-sm text-red-700">
+                    <strong><i class="fas fa-exclamation-triangle mr-1"></i> Ciclo Finalizado:</strong> El ciclo {{ seccion.ciclo.nombre }} ha sido marcado como terminado. Las notas están bloqueadas y no pueden ser editadas. Solo puedes visualizar las calificaciones.
+                </div>
+            </div>
+        </div>
+        {% else %}
         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <div class="flex items-center">
                 <i class="fas fa-info-circle text-blue-500 mr-3"></i>
@@ -86,6 +96,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
 
         <div class="bg-white shadow-lg rounded-lg overflow-hidden">
             <div class="overflow-x-auto">
@@ -133,8 +144,9 @@
                                         min="0"
                                         max="20"
                                         {% if nota.valor is not None %}value="{{ nota.valor|format_decimal }}"{% endif %}
-                                        class="nota-input flex-1 text-center border border-gray-300 rounded px-2 py-2 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                                        class="nota-input flex-1 text-center border {% if ciclo_terminado %}border-gray-200 bg-gray-100{% else %}border-gray-300{% endif %} rounded px-2 py-2 focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
                                         placeholder="Pendiente"
+                                        {% if ciclo_terminado %}disabled readonly style="cursor: not-allowed;"{% endif %}
                                         data-matricula-id="{{ matricula.id }}"
                                         data-componente-id="{{ nota.componente.id }}"
                                         data-nota-id="{{ nota.id|default:'' }}"
@@ -144,6 +156,7 @@
                                         onblur="formatearYGuardarNota(this)"
                                         onkeypress="if(event.key === 'Enter') { this.blur(); }"
                                     >
+                                    {% if not ciclo_terminado %}
                                     <button
                                         type="button"
                                         class="btn-eliminar-nota text-red-600 hover:text-red-800 hover:bg-red-50 rounded p-1.5 transition {% if nota.valor is None %}hidden{% endif %}"
@@ -154,6 +167,7 @@
                                     >
                                         <i class="fas fa-trash text-sm"></i>
                                     </button>
+                                    {% endif %}
                                 </div>
                             </td>
                             {% endfor %}
@@ -373,6 +387,9 @@
 </div>
 
 <script>
+// Variable global para verificar si el ciclo está terminado
+const cicloTerminado = {% if ciclo_terminado %}true{% else %}false{% endif %};
+
 // CSRF Token para peticiones AJAX
 function getCookie(name) {
     let cookieValue = null;
@@ -519,6 +536,11 @@ function setNotaOriginal(input) {
 
 // Formatear y guardar nota
 function formatearYGuardarNota(input) {
+    // Si el ciclo está terminado, no permitir edición
+    if (cicloTerminado) {
+        return;
+    }
+
     const originalValor = (input.dataset.originalValue || '').trim();
 
     // Si el campo queda vacío y antes tenía un valor, se considera eliminación -> 0.

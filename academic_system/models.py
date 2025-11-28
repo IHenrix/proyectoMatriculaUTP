@@ -191,9 +191,36 @@ class Ciclo(models.Model):
     Patrón Strategy: Diferentes estrategias de validación de matrícula.
     """
     nombre = models.CharField(max_length=50, unique=True)  # Ej: 2025-2
-    fecha_inicio_matricula = models.DateField()
-    fecha_fin_matricula = models.DateField()
-    matricula_abierta = models.BooleanField(default=True)
+
+    # Fechas del ciclo académico
+    fecha_inicio_ciclo = models.DateField(
+        help_text="Fecha de inicio del ciclo académico",
+        null=True,
+        blank=True
+    )
+    fecha_fin_ciclo = models.DateField(
+        help_text="Fecha de fin del ciclo académico",
+        null=True,
+        blank=True
+    )
+
+    # Fechas de matrícula
+    fecha_inicio_matricula = models.DateField(
+        help_text="Fecha de inicio del período de matrícula"
+    )
+    fecha_fin_matricula = models.DateField(
+        help_text="Fecha de fin del período de matrícula"
+    )
+
+    # Estados del ciclo
+    matricula_abierta = models.BooleanField(
+        default=True,
+        help_text="Indica si la matrícula está abierta"
+    )
+    ciclo_terminado = models.BooleanField(
+        default=False,
+        help_text="Indica si el ciclo ha finalizado. Las notas quedan bloqueadas."
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -205,7 +232,12 @@ class Ciclo(models.Model):
         ordering = ['-nombre']
 
     def __str__(self):
-        return self.nombre
+        estado = ""
+        if self.ciclo_terminado:
+            estado = " (Finalizado)"
+        elif self.puede_matricularse():
+            estado = " (Matrícula Abierta)"
+        return f"{self.nombre}{estado}"
 
     def puede_matricularse(self):
         """
@@ -216,14 +248,40 @@ class Ciclo(models.Model):
         hoy = date.today()
         return (
             self.matricula_abierta and
-            self.fecha_inicio_matricula <= hoy <= self.fecha_fin_matricula
+            self.fecha_inicio_matricula <= hoy <= self.fecha_fin_matricula and
+            not self.ciclo_terminado
         )
+
+    def esta_activo(self):
+        """
+        Verifica si el ciclo está actualmente en curso.
+
+        Returns:
+            bool: True si está dentro del rango de fechas del ciclo
+        """
+        from datetime import date
+        hoy = date.today()
+        return self.fecha_inicio_ciclo <= hoy <= self.fecha_fin_ciclo
 
     def clean(self):
         """Validación de fechas"""
+        # Validar que fecha_inicio_ciclo < fecha_fin_ciclo
+        if self.fecha_inicio_ciclo and self.fecha_fin_ciclo:
+            if self.fecha_inicio_ciclo > self.fecha_fin_ciclo:
+                raise ValidationError('La fecha de inicio del ciclo debe ser anterior a la fecha de fin')
+
+        # Validar que fecha_inicio_matricula < fecha_fin_matricula
         if self.fecha_inicio_matricula and self.fecha_fin_matricula:
             if self.fecha_inicio_matricula > self.fecha_fin_matricula:
-                raise ValidationError('La fecha de inicio debe ser anterior a la fecha de fin')
+                raise ValidationError('La fecha de inicio de matrícula debe ser anterior a la fecha de fin')
+
+        # Validar que las fechas de matrícula estén dentro del rango del ciclo
+        if all([self.fecha_inicio_ciclo, self.fecha_fin_ciclo,
+                self.fecha_inicio_matricula, self.fecha_fin_matricula]):
+            if self.fecha_inicio_matricula < self.fecha_inicio_ciclo:
+                raise ValidationError('La fecha de inicio de matrícula debe estar dentro del período del ciclo')
+            if self.fecha_fin_matricula > self.fecha_fin_ciclo:
+                raise ValidationError('La fecha de fin de matrícula debe estar dentro del período del ciclo')
 
 
 class Seccion(models.Model):
