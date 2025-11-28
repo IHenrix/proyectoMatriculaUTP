@@ -1,0 +1,43 @@
+# Requirements para Azure Production
+# Basado en requirements.txt + dependencias Azure
+
+# Django y core
+asgiref==3.11.0
+django==4.2.26
+sqlparse==0.5.3
+typing-extensions==4.15.0
+tzdata==2025.2
+
+# Servidor WSGI
+gunicorn==23.0.0
+
+# Base de datos MySQL
+mysqlclient==2.2.7
+
+# Archivos estáticos (WhiteNoise para servir desde App Service)
+whitenoise==6.11.0
+
+# Azure Services
+azure-identity==1.19.0
+azure-keyvault-secrets==4.9.0
+azure-storage-blob==12.23.1
+
+# Generación de reportes
+reportlab==4.4.5
+openpyxl==3.1.5
+et-xmlfile==2.0.0
+pillow==11.3.0
+
+# Configuración
+python-decouple==3.8
+
+# CORS (si necesitas API externa)
+django-cors-headers==4.6.0
+
+# Monitoreo (opcional pero recomendado)
+opencensus-ext-azure==1.1.13
+opencensus-ext-django==0.8.0
+
+# Utilidades
+charset-normalizer==3.4.4
+packaging==25.0
