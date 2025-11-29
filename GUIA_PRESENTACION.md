@@ -216,7 +216,7 @@ def get_dashboard_url(self):
 #### A. Dashboard de Administrador (1 minuto)
 
 **Qué hacer:**
-1. Login como admin: `admin` / `admin123`
+1. Login como admin: `75911772` / `Pedro1415@`
 2. Mostrar dashboard
 
 **Qué decir:**
@@ -352,13 +352,13 @@ def puede_matricularse(self):
 
 **Qué hacer:**
 1. Logout del admin
-2. Login con el alumno creado:
-   - Usuario: `U12345678` (el código generado)
-   - Contraseña: `75000001` (el DNI por defecto)
+2. Login como Kelvin (alumno sin matrícula):
+   - Usuario: `73309801` (DNI de Kelvin)
+   - Contraseña: `Pedro1415@`
 3. Mostrar dashboard de alumno
 
 **Qué decir:**
-> "Voy a iniciar sesión como el alumno que Juan José acaba de crear. Noten que la contraseña por defecto es el DNI."
+> "Voy a iniciar sesión como Kelvin, un alumno que aún no está matriculado en ningún curso. Esto nos permitirá ver el proceso completo de matrícula."
 
 **Qué señalar:**
 - Dashboard personalizado del alumno
@@ -386,16 +386,23 @@ def matricularse(request, seccion_id):
 **Qué hacer:**
 
 1. **Ver Secciones Disponibles:**
-   - Ir a "Matricularse" o "Buscar Secciones"
+   - Ir a "Matrícula" en el menú del alumno
    - Mostrar tabla con secciones disponibles
-   
-2. **Matricularse:**
-   - Click en "Matricularme" en una sección
-   - Esperar confirmación
-   - **IMPORTANTE:** Mostrar que las vacantes cambiaron automáticamente
+   - **IMPORTANTE:** Señalar las vacantes que muestra cada sección (ej: "30/30 Disponible")
+   - **TOMAR NOTA** o screenshot de las vacantes ANTES de matricularse
 
-3. **Después de Matricularse:**
-   > "Ahora tiene 24 vacantes disponibles. ¿Qué pasó? El **Observer Pattern** actualizó automáticamente las vacantes cuando me matriculé."
+2. **Matricularse:**
+   - Seleccionar una sección (ej: Diseño de patrones - Sección 16309)
+   - **DECIR:** "Noten que esta sección tiene 30 vacantes disponibles de 30 totales"
+   - Click en "Matricularme" en esa sección
+   - Confirmar en el modal
+   - Esperar mensaje de confirmación
+
+3. **Después de Matricularse (DEMOSTRACIÓN DEL OBSERVER):**
+   - **Recargar la página** (F5)
+   - **SEÑALAR:** "Ahora miren las vacantes de la misma sección"
+   - Mostrar que cambió de "30/30" a "29/30"
+   - **DECIR:** "¿Qué pasó? El **Observer Pattern** actualizó automáticamente las vacantes cuando me matriculé. Yo NO las actualicé manualmente."
 
 **Qué decir (CLAVE):**
 
@@ -471,13 +478,12 @@ def creditos(self):
 
 ### 📂 ARCHIVOS A TENER ABIERTOS
 
-- VS Code:
-  - `decorators.py:65-71` (alumno_required)
-  - `signals.py:17-42` (Observer actualizar vacantes)
-  - `views.py:299-340` (matricularse)
-  - `matricula_service.py:60-110` (matricular_alumno)
-- Navegador: Sistema como alumno
-- Notepad: Anotar vacantes antes/después para mostrar diferencia
+- VS Code (pantalla dividida):
+  - **Lado izquierdo:** `views.py:454-466` (alumno_matricular_seccion)
+  - **Lado derecho:** `signals.py` - buscar función `actualizar_vacantes_al_matricular`
+  - Tener preparado también: `decorators.py` (alumno_required)
+- Navegador: Sistema como alumno (Kelvin logueado)
+- **MUY IMPORTANTE:** Tener papel y lápiz para anotar vacantes ANTES de matricularse, o tomar screenshot
 
 ### 🎯 PATRONES A DESTACAR
 
@@ -489,15 +495,49 @@ def creditos(self):
 
 ### 💬 FRASES CLAVE
 
-**Al matricularse:**
-> "Observer Pattern: La matrícula NO sabe que las vacantes se van a actualizar. El signal lo hace automáticamente. Esto es desacoplamiento."
+**ANTES de matricularse:**
+> "Vean aquí: esta sección tiene **30 vacantes disponibles de 30 totales**. Voy a anotar esto." (Anotar en papel visible o tomar screenshot)
 
-**Al mostrar cursos:**
+**AL matricularse:**
+> "Ahora me voy a matricular en esta sección. Observen el proceso."
+
+**DESPUÉS de matricularse (al recargar):**
+> "¡Miren! Ahora tiene **29 vacantes de 30**. ¿Qué pasó? El **Observer Pattern** actualizó las vacantes automáticamente. La clase Matrícula NO sabe que esto ocurre. El signal `actualizar_vacantes_al_matricular` escucha el evento `post_save` y actualiza las vacantes sin que Matrícula lo sepa. Esto es **desacoplamiento total**."
+
+**Al mostrar el código:**
+> "Aquí en `signals.py` ven el observer. Cuando se crea una matrícula, automáticamente incrementa `vacantes_ocupadas` en 1. Si mañana queremos enviar un email, agregamos otro observer. No tocamos la clase Matrícula."
+
+**Al mostrar cursos matriculados:**
 > "Information Expert: Cada objeto conoce su propia información. La matrícula sabe sus créditos, la sección sabe si tiene vacantes."
 
 ### 💬 FRASE DE CIERRE
 
 > "Ahora que estoy matriculado, Ángel va a mostrar cómo el profesor me ve en su lista de alumnos y registra mis notas."
+
+---
+
+### ⚠️ TIPS ESPECÍFICOS PARA KELVIN
+
+1. **ANTES de la presentación:**
+   - Verificar que NO estés matriculado en ningún curso
+   - Si estás matriculado, usar el admin para eliminar tus matrículas
+   - Identificar qué sección tiene 30/30 vacantes disponibles
+
+2. **DURANTE la presentación:**
+   - **HABLAR CLARO** al decir el número de vacantes ANTES de matricularte
+   - Hacer **PAUSA** después de matricularte para dar tiempo al sistema
+   - **RECARGAR** la página con F5 para mostrar el cambio
+   - Usar el **MOUSE** para señalar en la pantalla dónde están las vacantes
+
+3. **AL mostrar el código:**
+   - Alternar entre navegador (vacantes cambiadas) y VS Code (código del signal)
+   - Señalar con el mouse la línea exacta: `instance.seccion.vacantes_ocupadas += 1`
+   - Explicar que este código se ejecutó AUTOMÁTICAMENTE
+
+4. **SI algo sale mal:**
+   - Si las vacantes no cambian: verificar que el signal esté activo (debe estarlo)
+   - Si no puedes matricularte: verificar que el ciclo tenga matrícula abierta
+   - Mantener la calma y explicar el concepto del Observer Pattern con el código
 
 ---
 
@@ -952,10 +992,12 @@ _estrategias = {
 - [ ] `models.py` en generar_codigo() abierto
 
 ### Para Kelvin:
-- [ ] Credenciales del alumno anotadas
-- [ ] Vacantes actuales anotadas (para mostrar cambio)
-- [ ] `signals.py` y `views.py` en split screen
-- [ ] Notepad con vacantes antes/después
+- [ ] Credenciales del alumno Kelvin: `73309801` / `Pedro1415@`
+- [ ] **CRÍTICO:** Papel y lápiz para anotar vacantes ANTES de matricularse (o screenshot)
+- [ ] VS Code con `views.py` (líneas 454-466) y `signals.py` en split screen
+- [ ] Navegador en página de matrícula del alumno
+- [ ] **IMPORTANTE:** Verificar que Kelvin NO esté matriculado antes de empezar
+- [ ] Tener identificada una sección con vacantes para matricularse (ej: Diseño de patrones 16309)
 
 ### Para Ángel:
 - [ ] Credenciales del profesor anotadas
