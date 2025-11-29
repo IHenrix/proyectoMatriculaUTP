@@ -299,7 +299,10 @@ class Command(BaseCommand):
             {'curso_idx': 1, 'codigo': '16306', 'profesor_idx': 2, 'dias': 'Miércoles 18:30-20:45', 'hora_inicio': time(18, 30), 'hora_fin': time(20, 45), 'modalidad': 'presencial', 'turno': 'noche'},
 
             # Redes y comunicación de datos I - 1 sección (curso_idx = 0)
-            {'curso_idx': 0, 'codigo': '11366', 'profesor_idx': 0, 'dias': 'Lunes 20:15-21:45, Miércoles 20:15-21:45', 'hora_inicio': time(20, 15), 'hora_fin': time(21, 45), 'modalidad': 'presencial', 'turno': 'noche'}
+            {'curso_idx': 0, 'codigo': '11366', 'profesor_idx': 0, 'dias': 'Lunes 20:15-21:45, Miércoles 20:15-21:45', 'hora_inicio': time(20, 15), 'hora_fin': time(21, 45), 'modalidad': 'presencial', 'turno': 'noche'},
+
+            # Base de datos II - 1 sección (curso_idx = 3)
+            {'curso_idx': 3, 'codigo': '16308', 'profesor_idx': 2, 'dias': 'Miércoles 18:30-20:00, Jueves 18:30-20:00', 'hora_inicio': time(18, 30), 'hora_fin': time(20, 0), 'modalidad': 'presencial', 'turno': 'noche'}
         ]
 
         secciones = []
@@ -534,6 +537,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('\nCredenciales (Usuario/Password):'))
         self.stdout.write(self.style.SUCCESS(f'  Admin: 75911772 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Profesor Nahui: 41523678 / Pedro1415@'))
+        self.stdout.write(self.style.SUCCESS(f'  Profesor Ecmias: 43745890 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Profesor Farfan: 44856901 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Profesor Arce (ciclo 2025-1): 45967823 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Alumno Juan (sin matrícula): 72365087 / Pedro1415@'))
@@ -545,6 +549,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('  - Taller de programación web (1 sección)'))
         self.stdout.write(self.style.SUCCESS('  - Algoritmos y estructuras de datos (2 secciones)'))
         self.stdout.write(self.style.SUCCESS('  - Redes y comunicación de datos I (1 sección)'))
+        self.stdout.write(self.style.SUCCESS('  - Base de datos II (1 sección - Prof. Ecmias)'))
         self.stdout.write(self.style.SUCCESS('\n--- CICLO 2025-1 (TERMINADO) ---'))
         self.stdout.write(self.style.WARNING('  - Base de datos II (1 sección - Prof. Arce - Kelvin DESAPROBADO 7.60)'))
         self.stdout.write(self.style.SUCCESS('  - Programación orientada a objetos (1 sección - Prof. Farfan - Kelvin APROBADO 19.80)'))
