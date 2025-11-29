@@ -84,6 +84,18 @@ class Command(BaseCommand):
                 'sexo': 'M',
                 'rol': 'profesor',
                 'password': 'Pedro1415@'
+            },
+            {
+                'nombre': 'Arce',
+                'apellido_paterno': 'Holgado',
+                'apellido_materno': 'Juan Carlos',
+                'tipo_documento': 'DNI',
+                'numero_documento': '45967823',
+                'email': 'arce.holgado@utp.edu.pe',
+                'telefono': '987567890',
+                'sexo': 'M',
+                'rol': 'profesor',
+                'password': 'Pedro1415@'
             }
         ]
 
@@ -262,6 +274,7 @@ class Command(BaseCommand):
         # profesores[1] = Rayme Serrano
         # profesores[2] = Ecmias Fernandez
         # profesores[3] = Miguel Angel Farfan
+        # profesores[4] = Arce Holgado
 
         secciones_config = [
             # Diseño de patrones - 3 secciones (curso_idx = 4)
@@ -309,6 +322,85 @@ class Command(BaseCommand):
                 secciones.append(seccion)
                 self.stdout.write(self.style.WARNING(f'Sección {seccion.codigo} ya existe'))
 
+        # ========================================
+        # CICLO 2025-1 TERMINADO - BASE DE DATOS II
+        # ========================================
+        # Crear sección de Base de datos II en ciclo 2025-1 (terminado)
+        # con profesor Arce Holgado para demostrar notas finalizadas
+
+        curso_bd2 = cursos[3]  # Base de datos II (índice 3)
+
+        if not Seccion.objects.filter(codigo='15892', curso=curso_bd2, ciclo=ciclo_2025_1).exists():
+            seccion_bd2_terminada = Seccion.objects.create(
+                codigo='15892',
+                curso=curso_bd2,
+                ciclo=ciclo_2025_1,
+                modalidad='presencial',
+                turno='noche',
+                dias_semana='Lunes 18:30-20:45, Miércoles 18:30-20:00',
+                hora_inicio=time(18, 30),
+                hora_fin=time(20, 45),
+                vacantes_totales=30,
+                vacantes_ocupadas=1  # Kelvin está matriculado
+            )
+
+            # Asignar profesor Arce Holgado
+            profesor_arce = profesores[4]
+            seccion_bd2_terminada.profesores.add(profesor_arce)
+
+            self.stdout.write(self.style.SUCCESS(f'[OK] Sección TERMINADA: {seccion_bd2_terminada.codigo} - {curso_bd2.nombre} (Prof: {profesor_arce.get_full_name()}) - Ciclo {ciclo_2025_1.nombre}'))
+
+            # Matricular a Kelvin en esta sección (índice 1)
+            kelvin = alumnos[1]
+            if not Matricula.objects.filter(alumno=kelvin, seccion=seccion_bd2_terminada).exists():
+                # Crear matrícula manualmente (sin usar servicio porque el ciclo está cerrado)
+                from django.utils import timezone
+                matricula_kelvin = Matricula.objects.create(
+                    alumno=kelvin,
+                    seccion=seccion_bd2_terminada,
+                    is_active=True
+                )
+                # Actualizar fecha de matrícula manualmente
+                Matricula.objects.filter(id=matricula_kelvin.id).update(
+                    fecha_matricula=timezone.make_aware(
+                        timezone.datetime.combine(date(2025, 2, 15), timezone.datetime.min.time())
+                    )
+                )
+
+                self.stdout.write(self.style.SUCCESS(f'[OK] Kelvin matriculado en {curso_bd2.nombre} (Ciclo terminado 2025-1)'))
+
+                # Registrar notas DESAPROBATORIAS para Kelvin
+                componentes_bd2 = ComponenteEvaluacion.objects.filter(curso=curso_bd2).order_by('orden')
+                notas_kelvin = [
+                    Decimal('7.50'),   # PC1 (20%) - DESAPROBADO
+                    Decimal('8.00'),   # PC2 (20%) - DESAPROBADO
+                    Decimal('9.50'),   # PC3 (20%)
+                    Decimal('6.50')    # TF (40%) - DESAPROBADO
+                ]
+
+                for i, componente in enumerate(componentes_bd2):
+                    nota = Nota.objects.create(
+                        matricula=matricula_kelvin,
+                        componente=componente,
+                        valor=notas_kelvin[i]
+                    )
+                    # Actualizar fecha de creación manualmente para simular registro antiguo
+                    Nota.objects.filter(id=nota.id).update(
+                        created_at=timezone.make_aware(
+                            timezone.datetime.combine(date(2025, 7, 20), timezone.datetime.min.time())
+                        )
+                    )
+
+                # Promedio final: (7.5*0.2 + 8.0*0.2 + 9.5*0.2 + 6.5*0.4) = 7.6 (DESAPROBADO < 10.5)
+                promedio_final = Decimal('7.60')
+
+                self.stdout.write(self.style.WARNING(f'[OK] Notas DESAPROBATORIAS registradas para Kelvin (Promedio calculado: {promedio_final}) - CICLO TERMINADO'))
+        else:
+            self.stdout.write(self.style.WARNING(f'Sección de Base de datos II en ciclo 2025-1 ya existe'))
+
+        # ========================================
+        # MATRICULAS EN CICLO ACTIVO 2025-2
+        # ========================================
         # Matricular alumnos excepto Juan (índice 0) y Kelvin (índice 1)
         # Angel: índice 2, Joel: índice 3
 
@@ -353,21 +445,25 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f'\n[INFO] Juan y Kelvin NO fueron matriculados (para demostración de flujo de matrícula)'))
 
         self.stdout.write(self.style.SUCCESS('\n========================================'))
-        self.stdout.write(self.style.SUCCESS('✓ Datos creados exitosamente!'))
+        self.stdout.write(self.style.SUCCESS('[OK] Datos creados exitosamente!'))
         self.stdout.write(self.style.SUCCESS('========================================'))
         self.stdout.write(self.style.SUCCESS('\nCredenciales (Usuario/Password):'))
         self.stdout.write(self.style.SUCCESS(f'  Admin: 75911772 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Profesor Nahui: 41523678 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Profesor Farfan: 44856901 / Pedro1415@'))
+        self.stdout.write(self.style.SUCCESS(f'  Profesor Arce (ciclo 2025-1): 45967823 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Alumno Juan (sin matrícula): 72365087 / Pedro1415@'))
+        self.stdout.write(self.style.SUCCESS(f'  Alumno Kelvin (notas 2025-1): 73309801 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Alumno Angel (matriculado): 74317595 / Pedro1415@'))
-        self.stdout.write(self.style.SUCCESS('\nCursos con secciones disponibles:'))
+        self.stdout.write(self.style.SUCCESS('\n--- CICLO 2025-2 (ACTIVO) ---'))
+        self.stdout.write(self.style.SUCCESS('Cursos con secciones disponibles:'))
         self.stdout.write(self.style.SUCCESS('  - Diseño de patrones (3 secciones)'))
         self.stdout.write(self.style.SUCCESS('  - Taller de programación web (1 sección)'))
         self.stdout.write(self.style.SUCCESS('  - Algoritmos y estructuras de datos (2 secciones)'))
         self.stdout.write(self.style.SUCCESS('  - Redes y comunicación de datos I (1 sección)'))
-        self.stdout.write(self.style.SUCCESS('\nCursos sin secciones (en sistema pero no matriculables):'))
-        self.stdout.write(self.style.SUCCESS('  - Base de datos II'))
+        self.stdout.write(self.style.SUCCESS('\n--- CICLO 2025-1 (TERMINADO) ---'))
+        self.stdout.write(self.style.WARNING('  - Base de datos II (1 sección - Prof. Arce - Kelvin DESAPROBADO)'))
+        self.stdout.write(self.style.SUCCESS('\nCursos sin secciones (en sistema):'))
         self.stdout.write(self.style.SUCCESS('  - Negociación y narrativa'))
         self.stdout.write(self.style.SUCCESS('  - Sistemas operativos'))
         self.stdout.write(self.style.SUCCESS('\nAccede a: http://localhost:8000'))
