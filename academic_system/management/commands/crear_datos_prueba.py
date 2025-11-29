@@ -182,7 +182,8 @@ class Command(BaseCommand):
             {'nombre': 'Base de datos II', 'creditos': 4, 'codigo': '1SI46'},
             {'nombre': 'Diseño de patrones', 'creditos': 2, 'codigo': '1SI47'},
             {'nombre': 'Negociación y narrativa', 'creditos': 2, 'codigo': '1S76T'},
-            {'nombre': 'Sistemas operativos', 'creditos': 3, 'codigo': '1TV74'}
+            {'nombre': 'Sistemas operativos', 'creditos': 3, 'codigo': '1TV74'},
+            {'nombre': 'Programación orientada a objetos', 'creditos': 3, 'codigo': '1I55N'}
         ]
 
         cursos = []
@@ -251,6 +252,13 @@ class Command(BaseCommand):
                 ('Practica calificada 3 (PC3)', Decimal('20.00')),
                 ('Participacion en clase (PA)', Decimal('10.00')),
                 ('Examen final (EXFN)', Decimal('30.00'))
+            ],
+            # Programación orientada a objetos
+            [
+                ('Practica calificada 1 (PC1)', Decimal('20.00')),
+                ('Practica calificada 2 (PC2)', Decimal('20.00')),
+                ('Practica calificada 3 (PC3)', Decimal('20.00')),
+                ('Proyecto final (PROY)', Decimal('40.00'))
             ]
         ]
 
@@ -399,6 +407,81 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(f'Sección de Base de datos II en ciclo 2025-1 ya existe'))
 
         # ========================================
+        # CICLO 2025-1 TERMINADO - PROGRAMACIÓN ORIENTADA A OBJETOS
+        # ========================================
+        # Crear sección de POO en ciclo 2025-1 (terminado)
+        # con profesor Farfan para demostrar notas APROBADAS
+
+        curso_poo = cursos[7]  # Programación orientada a objetos (índice 7)
+
+        if not Seccion.objects.filter(codigo='44337', curso=curso_poo, ciclo=ciclo_2025_1).exists():
+            seccion_poo_terminada = Seccion.objects.create(
+                codigo='44337',
+                curso=curso_poo,
+                ciclo=ciclo_2025_1,
+                modalidad='presencial',
+                turno='noche',
+                dias_semana='Martes 18:30-20:00, Jueves 18:30-20:00',
+                hora_inicio=time(18, 30),
+                hora_fin=time(20, 0),
+                vacantes_totales=30,
+                vacantes_ocupadas=1  # Kelvin está matriculado
+            )
+
+            # Asignar profesor Farfan
+            profesor_farfan = profesores[3]
+            seccion_poo_terminada.profesores.add(profesor_farfan)
+
+            self.stdout.write(self.style.SUCCESS(f'[OK] Sección TERMINADA: {seccion_poo_terminada.codigo} - {curso_poo.nombre} (Prof: {profesor_farfan.get_full_name()}) - Ciclo {ciclo_2025_1.nombre}'))
+
+            # Matricular a Kelvin en esta sección (índice 1)
+            kelvin = alumnos[1]
+            if not Matricula.objects.filter(alumno=kelvin, seccion=seccion_poo_terminada).exists():
+                # Crear matrícula manualmente (sin usar servicio porque el ciclo está cerrado)
+                matricula_kelvin_poo = Matricula.objects.create(
+                    alumno=kelvin,
+                    seccion=seccion_poo_terminada,
+                    is_active=True
+                )
+                # Actualizar fecha de matrícula manualmente
+                Matricula.objects.filter(id=matricula_kelvin_poo.id).update(
+                    fecha_matricula=timezone.make_aware(
+                        timezone.datetime.combine(date(2025, 2, 15), timezone.datetime.min.time())
+                    )
+                )
+
+                self.stdout.write(self.style.SUCCESS(f'[OK] Kelvin matriculado en {curso_poo.nombre} (Ciclo terminado 2025-1)'))
+
+                # Registrar notas APROBATORIAS para Kelvin
+                componentes_poo = ComponenteEvaluacion.objects.filter(curso=curso_poo).order_by('orden')
+                notas_kelvin_poo = [
+                    Decimal('19.00'),   # PC1 (20%) - APROBADO
+                    Decimal('20.00'),   # PC2 (20%) - APROBADO
+                    Decimal('20.00'),   # PC3 (20%) - APROBADO
+                    Decimal('20.00')    # PROY (40%) - APROBADO
+                ]
+
+                for i, componente in enumerate(componentes_poo):
+                    nota = Nota.objects.create(
+                        matricula=matricula_kelvin_poo,
+                        componente=componente,
+                        valor=notas_kelvin_poo[i]
+                    )
+                    # Actualizar fecha de creación manualmente para simular registro antiguo
+                    Nota.objects.filter(id=nota.id).update(
+                        created_at=timezone.make_aware(
+                            timezone.datetime.combine(date(2025, 7, 20), timezone.datetime.min.time())
+                        )
+                    )
+
+                # Promedio final: (19*0.2 + 20*0.2 + 20*0.2 + 20*0.4) = 3.8 + 4.0 + 4.0 + 8.0 = 19.8 (APROBADO)
+                promedio_final_poo = Decimal('19.80')
+
+                self.stdout.write(self.style.SUCCESS(f'[OK] Notas APROBATORIAS registradas para Kelvin (Promedio calculado: {promedio_final_poo}) - CICLO TERMINADO'))
+        else:
+            self.stdout.write(self.style.WARNING(f'Sección de Programación orientada a objetos en ciclo 2025-1 ya existe'))
+
+        # ========================================
         # MATRICULAS EN CICLO ACTIVO 2025-2
         # ========================================
         # Matricular alumnos excepto Juan (índice 0) y Kelvin (índice 1)
@@ -462,7 +545,8 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('  - Algoritmos y estructuras de datos (2 secciones)'))
         self.stdout.write(self.style.SUCCESS('  - Redes y comunicación de datos I (1 sección)'))
         self.stdout.write(self.style.SUCCESS('\n--- CICLO 2025-1 (TERMINADO) ---'))
-        self.stdout.write(self.style.WARNING('  - Base de datos II (1 sección - Prof. Arce - Kelvin DESAPROBADO)'))
+        self.stdout.write(self.style.WARNING('  - Base de datos II (1 sección - Prof. Arce - Kelvin DESAPROBADO 7.60)'))
+        self.stdout.write(self.style.SUCCESS('  - Programación orientada a objetos (1 sección - Prof. Farfan - Kelvin APROBADO 19.80)'))
         self.stdout.write(self.style.SUCCESS('\nCursos sin secciones (en sistema):'))
         self.stdout.write(self.style.SUCCESS('  - Negociación y narrativa'))
         self.stdout.write(self.style.SUCCESS('  - Sistemas operativos'))
