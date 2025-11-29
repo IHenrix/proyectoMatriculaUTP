@@ -13,18 +13,22 @@
             </div>
 
             {% if ciclos_disponibles %}
-            <div class="flex items-center">
-                <label for="ciclo-selector" class="text-sm font-medium text-gray-700 mr-3">
-                    <i class="fas fa-calendar-alt mr-1"></i>
-                    Ciclo:
-                </label>
-                <select id="ciclo-selector" onchange="cambiarCiclo(this.value)" class="block w-48 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md shadow-sm">
+            <div class="flex items-center gap-4 bg-gradient-to-r from-primary-50 to-blue-50 px-6 py-3 rounded-xl shadow-md border-2 border-primary-200">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-calendar-alt text-primary-600 text-lg"></i>
+                    <label for="ciclo-selector" class="text-sm font-bold text-primary-800">
+                        Seleccionar Ciclo
+                    </label>
+                </div>
+                <select
+                    id="ciclo-selector"
+                    onchange="cambiarCiclo(this.value)"
+                    class="block min-w-[280px] h-12 pl-4 pr-12 text-base font-semibold text-gray-900 border-2 border-primary-400 rounded-lg bg-white hover:bg-gray-50 shadow-sm focus:outline-none focus:ring-4 focus:ring-primary-300 focus:border-primary-600 transition-all duration-200 cursor-pointer"
+                    style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%232563eb%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1.5em 1.5em;"
+                >
                     {% for ciclo in ciclos_disponibles %}
                     <option value="{{ ciclo.id }}" {% if ciclo_seleccionado and ciclo.id == ciclo_seleccionado.id %}selected{% endif %}>
-                        {{ ciclo.nombre }}
-                        {% if ciclo.ciclo_terminado %}
-                        <i class="fas fa-lock"></i> (Terminado)
-                        {% endif %}
+                        📚 Ciclo {{ ciclo.nombre }}{% if ciclo.ciclo_terminado %} (Terminado){% endif %}
                     </option>
                     {% endfor %}
                 </select>
