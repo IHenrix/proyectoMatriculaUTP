@@ -132,6 +132,7 @@ class Command(BaseCommand):
                 alumnos.append(alumno)
                 self.stdout.write(self.style.WARNING(f'Alumno {alumno.codigo} ya existe'))
 
+        # Ciclo 2025-2 (ACTIVO)
         if not Ciclo.objects.filter(nombre='2025-2').exists():
             ciclo = Ciclo.objects.create(
                 nombre='2025-2',
@@ -141,10 +142,26 @@ class Command(BaseCommand):
                 fecha_fin_matricula=date(2025, 11, 30),
                 matricula_abierta=True
             )
-            self.stdout.write(self.style.SUCCESS(f'[OK] Ciclo: {ciclo.nombre}'))
+            self.stdout.write(self.style.SUCCESS(f'[OK] Ciclo activo: {ciclo.nombre}'))
         else:
             ciclo = Ciclo.objects.get(nombre='2025-2')
             self.stdout.write(self.style.WARNING(f'Ciclo {ciclo.nombre} ya existe'))
+
+        # Ciclo 2025-1 (TERMINADO E INACTIVO)
+        if not Ciclo.objects.filter(nombre='2025-1').exists():
+            ciclo_2025_1 = Ciclo.objects.create(
+                nombre='2025-1',
+                fecha_inicio_ciclo=date(2025, 3, 20),
+                fecha_fin_ciclo=date(2025, 7, 25),
+                fecha_inicio_matricula=date(2025, 2, 2),
+                fecha_fin_matricula=date(2025, 3, 25),
+                matricula_abierta=False,
+                ciclo_terminado=True
+            )
+            self.stdout.write(self.style.SUCCESS(f'[OK] Ciclo terminado: {ciclo_2025_1.nombre}'))
+        else:
+            ciclo_2025_1 = Ciclo.objects.get(nombre='2025-1')
+            self.stdout.write(self.style.WARNING(f'Ciclo {ciclo_2025_1.nombre} ya existe'))
 
         cursos_data = [
             {'nombre': 'Redes y comunicación de datos I', 'creditos': 4, 'codigo': '1I41N'},
