@@ -132,17 +132,18 @@ class Command(BaseCommand):
                 alumnos.append(alumno)
                 self.stdout.write(self.style.WARNING(f'Alumno {alumno.codigo} ya existe'))
 
-        today = date.today()
-        if not Ciclo.objects.filter(nombre='2025-1').exists():
+        if not Ciclo.objects.filter(nombre='2025-2').exists():
             ciclo = Ciclo.objects.create(
-                nombre='2025-1',
-                fecha_inicio_matricula=today - timedelta(days=15),
-                fecha_fin_matricula=today + timedelta(days=30),
+                nombre='2025-2',
+                fecha_inicio_ciclo=date(2025, 8, 12),
+                fecha_fin_ciclo=date(2025, 12, 20),
+                fecha_inicio_matricula=date(2025, 8, 1),
+                fecha_fin_matricula=date(2025, 11, 30),
                 matricula_abierta=True
             )
             self.stdout.write(self.style.SUCCESS(f'[OK] Ciclo: {ciclo.nombre}'))
         else:
-            ciclo = Ciclo.objects.get(nombre='2025-1')
+            ciclo = Ciclo.objects.get(nombre='2025-2')
             self.stdout.write(self.style.WARNING(f'Ciclo {ciclo.nombre} ya existe'))
 
         cursos_data = [
