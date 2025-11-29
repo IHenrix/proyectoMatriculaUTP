@@ -88,7 +88,7 @@ class Command(BaseCommand):
             {
                 'nombre': 'Arce',
                 'apellido_paterno': 'Holgado',
-                'apellido_materno': 'Juan Carlos',
+                'apellido_materno': 'Adrian Guillermo',
                 'tipo_documento': 'DNI',
                 'numero_documento': '45967823',
                 'email': 'arce.holgado@utp.edu.pe',
