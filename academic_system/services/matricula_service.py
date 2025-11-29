@@ -11,6 +11,8 @@ Patrones de Diseño:
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from academic_system.models import Matricula, Seccion, Usuario, Ciclo, Nota, ComponenteEvaluacion
+from academic_system.services.vacante_proxy import SeccionVacanteProxy
+from academic_system.services.prototype import NotaPrototype
 
 
 class MatriculaService:
@@ -65,21 +67,21 @@ class MatriculaService:
 
         Args:
             alumno_id: ID del alumno
-            seccion_id: ID de la sección
+            seccion_id: ID de la seccion
 
         Returns:
-            Matricula: Matrícula creada o reactivada
+            Matricula: Matricula creada o reactivada
 
         Raises:
-            ValidationError: Si la matrícula no es válida
+            ValidationError: Si la matricula no es valida
         """
-        alumno = Usuario.objects.get(pk=alumno_id, rol='alumno')
+        alumno = Usuario.objects.get(pk=alumno_id, rol="alumno")
         seccion = Seccion.objects.get(pk=seccion_id)
 
-        # Validar matrícula
+        # Validar matricula
         MatriculaService.validar_matricula(alumno, seccion)
 
-        # Verificar si existe una matrícula inactiva (alumno que se desmatriculó antes)
+        # Verificar si existe una matricula inactiva (alumno que se desmatriculo antes)
         matricula_existente = Matricula.objects.filter(
             alumno=alumno,
             seccion=seccion,
@@ -87,27 +89,63 @@ class MatriculaService:
         ).first()
 
         if matricula_existente:
-            # Reactivar matrícula existente
+            # Reactivar matricula existente
             matricula_existente.is_active = True
-            matricula_existente.save()
+            matricula_existente.save(update_fields=["is_active"])
+            SeccionVacanteProxy(seccion).ocupar_vacante()
 
             matricula = matricula_existente
         else:
-            # Crear nueva matrícula
+            # Crear nueva matricula
             matricula = Matricula.objects.create(
                 alumno=alumno,
                 seccion=seccion
             )
 
-            # Crear notas vacías para cada componente de evaluación
+            # Prototype Pattern: clonar notas vacias a partir de un prototipo base
+            nota_prototipo = NotaPrototype({"matricula": matricula})
             componentes = ComponenteEvaluacion.objects.filter(curso=seccion.curso)
             for componente in componentes:
-                Nota.objects.create(
-                    matricula=matricula,
-                    componente=componente
-                )
+                datos_nota = nota_prototipo.clone(componente=componente)
+                Nota.objects.create(**datos_nota)
 
         return matricula
+
+    @staticmethod
+    def validar_matricula(alumno, seccion):
+        """
+        Strategy Pattern: Validación de matrícula.
+
+        Args:
+            alumno: Usuario alumno
+            seccion: Sección a matricular
+
+        Raises:
+            ValidationError: Si la matrícula no es válida
+        """
+        # Validación 1: El ciclo debe permitir matrícula
+        if not seccion.ciclo.puede_matricularse():
+            raise ValidationError('El ciclo no está en periodo de matrícula')
+
+        # Validación 2: Debe haber vacantes
+        if not seccion.tiene_vacantes:
+            raise ValidationError('No hay vacantes disponibles en esta sección')
+
+        # Validación 3: El alumno no debe estar ya matriculado en esta sección
+        if Matricula.objects.filter(alumno=alumno, seccion=seccion, is_active=True).exists():
+            raise ValidationError('Ya estás matriculado en esta sección')
+
+        # Validación 4: El alumno no puede matricularse en dos secciones del mismo curso en el mismo ciclo
+        matriculas_curso = Matricula.objects.filter(
+            alumno=alumno,
+            seccion__curso=seccion.curso,
+            seccion__ciclo=seccion.ciclo,
+            is_active=True
+        )
+        if matriculas_curso.exists():
+            raise ValidationError(f'Ya estás matriculado en otra sección de {seccion.curso.nombre}')
+
+        return True
 
     @staticmethod
     @transaction.atomic

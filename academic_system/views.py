@@ -16,6 +16,8 @@ from django.db.models import Q
 from .decorators import admin_required, profesor_required, alumno_required
 from .models import Usuario, Curso, Ciclo, Seccion, ComponenteEvaluacion, Matricula, Nota
 from .services import UsuarioService, MatriculaService, NotaService, ReporteService
+from academic_system.services.reporte_service import ResponseAdapter
+from academic_system.services.vacante_proxy import SeccionVacanteProxy
 
 
 # ==============================================================================
@@ -480,14 +482,13 @@ def alumno_desmatricular(request, matricula_id):
                 messages.error(request, 'El periodo de matrícula ha finalizado. No puedes retirarte del curso.')
                 return redirect('alumno_matricula')
 
-            # Desactivar la matrícula
+            # Desactivar la matr??cula
             matricula.is_active = False
-            matricula.save()
+            matricula.save(update_fields=["is_active"])
 
-            # Actualizar vacantes
+            # Actualizar vacantes con Proxy (protege contadores)
             seccion = matricula.seccion
-            seccion.vacantes_ocupadas -= 1
-            seccion.save()
+            SeccionVacanteProxy(seccion).liberar_vacante()
 
             messages.success(request, f'Te has retirado exitosamente del curso: {matricula.seccion.curso.nombre}')
 
@@ -586,9 +587,7 @@ def profesor_exportar_lista_alumnos(request, seccion_id, formato='excel'):
             content_type = 'application/pdf'
             filename = f'lista_alumnos_{seccion.codigo}.pdf'
 
-        response = HttpResponse(buffer.getvalue(), content_type=content_type)
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        return response
+        return ResponseAdapter.from_buffer(buffer, content_type, filename)
 
     except Exception as e:
         messages.error(request, f'Error al generar reporte: {str(e)}')
@@ -610,9 +609,7 @@ def profesor_exportar_notas(request, seccion_id, formato='excel'):
             content_type = 'application/pdf'
             filename = f'notas_{seccion.codigo}.pdf'
 
-        response = HttpResponse(buffer.getvalue(), content_type=content_type)
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
-        return response
+        return ResponseAdapter.from_buffer(buffer, content_type, filename)
 
     except Exception as e:
         messages.error(request, f'Error al generar reporte: {str(e)}')

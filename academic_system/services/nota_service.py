@@ -11,6 +11,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from decimal import Decimal
 from academic_system.models import Nota, Matricula, ComponenteEvaluacion
+from academic_system.services.memento import NotaCaretaker
 
 
 class NotaService:
@@ -57,6 +58,7 @@ class NotaService:
         )
 
         if not created:
+            NotaCaretaker.guardar_snapshot(nota.id, {"valor": nota.valor})
             nota.valor = valor
             nota.save()
 

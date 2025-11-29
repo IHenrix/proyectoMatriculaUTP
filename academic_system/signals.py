@@ -12,6 +12,7 @@ observadores (receivers) son notificados automáticamente.
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 from django.db import transaction
+from academic_system.services.vacante_proxy import SeccionVacanteProxy
 
 
 @receiver(post_save, sender='academic_system.Matricula')
@@ -31,9 +32,8 @@ def actualizar_vacantes_al_matricular(sender, instance, created, **kwargs):
     """
     # Solo actuar si es una matrícula nueva y está activa
     if created and instance.is_active:
-        # Incrementar vacantes ocupadas
-        instance.seccion.vacantes_ocupadas += 1
-        instance.seccion.save(update_fields=['vacantes_ocupadas'])
+        proxy = SeccionVacanteProxy(instance.seccion)
+        proxy.ocupar_vacante()
 
 
 @receiver(pre_delete, sender='academic_system.Matricula')
@@ -52,8 +52,8 @@ def liberar_vacante_al_desmatricular(sender, instance, **kwargs):
     """
     # Solo liberar vacante si la matrícula estaba activa
     if instance.is_active:
-        instance.seccion.vacantes_ocupadas -= 1
-        instance.seccion.save(update_fields=['vacantes_ocupadas'])
+        proxy = SeccionVacanteProxy(instance.seccion)
+        proxy.liberar_vacante()
 
 
 @receiver(post_save, sender='academic_system.Nota')

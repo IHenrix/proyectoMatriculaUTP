@@ -19,6 +19,100 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from django.conf import settings
 from academic_system.models import Matricula, Nota
+from django.http import HttpResponse
+
+# ============================================================
+# Abstract Factory
+# ============================================================
+
+
+class ReporteAbstractFactory:
+    """Abstract Factory para estrategias de reporte."""
+
+    def crear_lista_alumnos(self):
+        raise NotImplementedError
+
+    def crear_reporte_notas(self):
+        raise NotImplementedError
+
+
+class ReporteExcelFactory(ReporteAbstractFactory):
+    def crear_lista_alumnos(self):
+        return ListaAlumnosExcelStrategy()
+
+    def crear_reporte_notas(self):
+        return NotasSeccionExcelStrategy()
+
+
+class ReportePDFFactory(ReporteAbstractFactory):
+    def crear_lista_alumnos(self):
+        return ListaAlumnosPDFStrategy()
+
+    def crear_reporte_notas(self):
+        return NotasSeccionPDFStrategy()
+
+
+# ============================================================
+# Adapter
+# ============================================================
+
+
+class ResponseAdapter:
+    """Adapter para transformar buffers en HttpResponse."""
+
+    @staticmethod
+    def from_buffer(buffer, content_type, filename):
+        response = HttpResponse(buffer.getvalue(), content_type=content_type)
+        response['Content-Disposition'] = f'attachment; filename=\"{filename}\"'
+        return response
+
+
+# ============================================================
+# Bridge
+# ============================================================
+
+
+class FormatoImplementor:
+    """Implementor que delega a factories por formato."""
+
+    def __init__(self, formato):
+        self.formato = formato
+        self.factory = ReporteExcelFactory() if formato == 'excel' else ReportePDFFactory()
+
+    def generar(self, tipo, **kwargs):
+        if tipo == 'lista_alumnos':
+            estrategia = self.factory.crear_lista_alumnos()
+        else:
+            estrategia = self.factory.crear_reporte_notas()
+        return estrategia.generar(**kwargs)
+
+
+class ReporteBridge:
+    """Abstracción que separa tipo de reporte de formato (Bridge Pattern)."""
+
+    def __init__(self, formato):
+        self.implementor = FormatoImplementor(formato)
+
+    def generar(self, tipo, **kwargs):
+        return self.implementor.generar(tipo, **kwargs)
+
+
+# ============================================================
+# Composite
+# ============================================================
+
+
+class TablaComposite:
+    """Composite simple para construir tablas (listas de filas)."""
+
+    def __init__(self):
+        self.filas = []
+
+    def agregar(self, fila):
+        self.filas.append(fila)
+
+    def to_rows(self):
+        return self.filas
 
 
 class ReporteStrategy:
@@ -120,6 +214,7 @@ class ReporteFactory:
     def crear_reporte(cls, tipo, formato, **kwargs):
         """
         FACTORY + STRATEGY PATTERN: Crea un reporte usando la estrategia apropiada.
+        ABSTRACT FACTORY + BRIDGE: Selecciona familia por formato y tipo.
 
         Args:
             tipo (str): 'lista_alumnos' o 'notas_seccion'
@@ -132,20 +227,23 @@ class ReporteFactory:
         Raises:
             ValueError: Si no existe estrategia para el tipo/formato solicitado
         """
-        # STRATEGY PATTERN: Seleccionar estrategia del registro
-        estrategia = cls._estrategias.get((tipo, formato))
+        # Bridge + Abstract Factory: delegar en implementor de formato
+        try:
+            return ReporteBridge(formato).generar(tipo, **kwargs)
+        except Exception:
+            # STRATEGY PATTERN: fallback al registro clásico
+            estrategia = cls._estrategias.get((tipo, formato))
 
-        if estrategia is None:
-            tipos_disponibles = ', '.join(
-                f"{t}/{f}" for t, f in cls._estrategias.keys()
-            )
-            raise ValueError(
-                f'Tipo de reporte no soportado: {tipo}/{formato}. '
-                f'Disponibles: {tipos_disponibles}'
-            )
+            if estrategia is None:
+                tipos_disponibles = ', '.join(
+                    f"{t}/{f}" for t, f in cls._estrategias.keys()
+                )
+                raise ValueError(
+                    f'Tipo de reporte no soportado: {tipo}/{formato}. '
+                    f'Disponibles: {tipos_disponibles}'
+                )
 
-        # Ejecutar estrategia seleccionada
-        return estrategia.generar(**kwargs)
+            return estrategia.generar(**kwargs)
 
 
 class ReporteBuilder:
@@ -467,7 +565,8 @@ class ReporteBuilder:
             headers.append(f"{comp.nombre[:10]}\n({comp.porcentaje}%)")
         headers.append('Promedio')
 
-        data = [headers]
+        tabla = TablaComposite()
+        tabla.agregar(headers)
 
         # Datos
         for idx, matricula in enumerate(matriculas, 1):
@@ -489,13 +588,15 @@ class ReporteBuilder:
             promedio = str(resultado['promedio']) if resultado['promedio'] else '-'
             row.append(promedio)
 
-            data.append(row)
+            tabla.agregar(row)
 
         # Crear tabla con anchos proporcionales
         col_widths = [0.3 * inch, 0.7 * inch, 1.8 * inch]
         for _ in componentes:
             col_widths.append(0.5 * inch)
         col_widths.append(0.6 * inch)
+
+        data = tabla.to_rows()
 
         table = Table(data, colWidths=col_widths)
         table.setStyle(TableStyle([
