@@ -447,6 +447,7 @@ def alumno_matricula(request):
         'ciclo': ciclo_activo,
         'cursos_disponibles': cursos_disponibles.values(),
         'creditos_actuales': creditos_actuales,
+        'total_cursos_matriculados': matriculas_actuales.count(),
     }
     return render(request, 'alumno/matricula.html', context)
 

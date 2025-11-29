@@ -172,11 +172,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="bg-blue-50 rounded-lg p-4 text-center">
                     <p class="text-sm text-blue-600 font-medium">Cursos Matriculados</p>
-                    <p class="text-4xl font-bold text-blue-900 mt-2">
-                        {% for item in cursos_disponibles %}
-                            {% if item.matriculado %}1{% endif %}
-                        {% endfor %}
-                    </p>
+                    <p class="text-4xl font-bold text-blue-900 mt-2">{{ total_cursos_matriculados }}</p>
                 </div>
                 <div class="bg-green-50 rounded-lg p-4 text-center">
                     <p class="text-sm text-green-600 font-medium">Créditos Totales</p>
