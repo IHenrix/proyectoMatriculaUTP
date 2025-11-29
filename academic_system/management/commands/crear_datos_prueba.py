@@ -112,7 +112,7 @@ class Command(BaseCommand):
 
         alumnos_data = [
             {'nombre': 'Juan Jose', 'apellido_paterno': 'Morales', 'apellido_materno': 'Velasquez', 'dni': '72365087', 'anio': 1998},
-            {'nombre': 'Kelvin Jesus', 'apellido_paterno': 'Acevedo', 'apellido_materno': 'Huarachi', 'dni': '73309801', 'anio': 1999},
+            {'nombre': 'Kelvin Jesus', 'apellido_paterno': 'Acevedo', 'apellido_materno': 'Huarachi', 'dni': '76603529', 'anio': 1999},
             {'nombre': 'Angel', 'apellido_paterno': 'Campusano', 'apellido_materno': 'Solis', 'dni': '74317595', 'anio': 1997},
             {'nombre': 'Joel Anthony', 'apellido_paterno': 'Saldaña', 'apellido_materno': 'Chavez', 'dni': '75650077', 'anio': 2000}
         ]
@@ -536,7 +536,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f'  Profesor Farfan: 44856901 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Profesor Arce (ciclo 2025-1): 45967823 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Alumno Juan (sin matrícula): 72365087 / Pedro1415@'))
-        self.stdout.write(self.style.SUCCESS(f'  Alumno Kelvin (notas 2025-1): 73309801 / Pedro1415@'))
+        self.stdout.write(self.style.SUCCESS(f'  Alumno Kelvin (notas 2025-1): 76603529 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Alumno Angel (matriculado): 74317595 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS('\n--- CICLO 2025-2 (ACTIVO) ---'))
         self.stdout.write(self.style.SUCCESS('Cursos con secciones disponibles:'))
