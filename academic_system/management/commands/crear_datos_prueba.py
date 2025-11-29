@@ -123,8 +123,7 @@ class Command(BaseCommand):
             if not Usuario.objects.filter(numero_documento=dni_num).exists():
                 mes = random.randint(1, 12)
                 dia = random.randint(1, 28)
-                # Contraseña especial para Kelvin (índice 1)
-                password = '12456789' if i == 1 else 'Pedro1415@'
+                password = '123456789' if i == 1 else 'Pedro1415@'
                 data = {
                     'nombre': alumno_data['nombre'],
                     'apellido_paterno': alumno_data['apellido_paterno'],
@@ -538,7 +537,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f'  Profesor Farfan: 44856901 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Profesor Arce (ciclo 2025-1): 45967823 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS(f'  Alumno Juan (sin matrícula): 72365087 / Pedro1415@'))
-        self.stdout.write(self.style.SUCCESS(f'  Alumno Kelvin (notas 2025-1): 76603529 / 12456789'))
+        self.stdout.write(self.style.SUCCESS(f'  Alumno Kelvin (notas 2025-1): 76603529 / 123456789'))
         self.stdout.write(self.style.SUCCESS(f'  Alumno Angel (matriculado): 74317595 / Pedro1415@'))
         self.stdout.write(self.style.SUCCESS('\n--- CICLO 2025-2 (ACTIVO) ---'))
         self.stdout.write(self.style.SUCCESS('Cursos con secciones disponibles:'))
