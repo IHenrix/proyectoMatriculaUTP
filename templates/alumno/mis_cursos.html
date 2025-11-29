@@ -280,19 +280,36 @@
     <div class="bg-white rounded-lg shadow-lg p-12 text-center">
         <div class="text-gray-400">
             <i class="fas fa-graduation-cap text-6xl mb-4"></i>
-            <h3 class="text-xl font-medium text-gray-900 mb-2">No tienes cursos matriculados</h3>
-            <p class="text-gray-500 mb-6">
+            {% if ciclos_disponibles and ciclo_seleccionado %}
+                <h3 class="text-xl font-medium text-gray-900 mb-2">No tienes cursos matriculados en el ciclo {{ ciclo_seleccionado.nombre }}</h3>
+                <p class="text-gray-500 mb-6">
+                    {% if puede_matricularse %}
+                    Matricúlate en las secciones disponibles para comenzar a ver tus notas en este ciclo.
+                    {% else %}
+                    Selecciona otro ciclo para ver tus cursos anteriores.
+                    {% endif %}
+                </p>
                 {% if puede_matricularse %}
-                Matricúlate en las secciones disponibles para comenzar a ver tus notas
-                {% else %}
-                No tienes cursos matriculados en este ciclo.
+                <a href="{% url 'alumno_matricula' %}" class="inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors">
+                    <i class="fas fa-clipboard-check mr-2"></i>
+                    Ir a Matrícula
+                </a>
                 {% endif %}
-            </p>
-            {% if puede_matricularse %}
-            <a href="{% url 'alumno_matricula' %}" class="inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-primary-600 hover:bg-primary-700">
-                <i class="fas fa-clipboard-check mr-2"></i>
-                Ir a Matrícula
-            </a>
+            {% else %}
+                <h3 class="text-xl font-medium text-gray-900 mb-2">No tienes cursos matriculados</h3>
+                <p class="text-gray-500 mb-6">
+                    {% if puede_matricularse %}
+                    Matricúlate en las secciones disponibles para comenzar a ver tus notas
+                    {% else %}
+                    No tienes cursos matriculados aún.
+                    {% endif %}
+                </p>
+                {% if puede_matricularse %}
+                <a href="{% url 'alumno_matricula' %}" class="inline-flex items-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors">
+                    <i class="fas fa-clipboard-check mr-2"></i>
+                    Ir a Matrícula
+                </a>
+                {% endif %}
             {% endif %}
         </div>
     </div>

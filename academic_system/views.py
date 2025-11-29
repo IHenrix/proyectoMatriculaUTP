@@ -503,11 +503,17 @@ def alumno_mis_cursos(request):
     """Ver cursos matriculados y notas con selector de ciclo"""
     alumno = request.user
 
-    # Obtener todos los ciclos donde el alumno tiene matrículas
-    ciclos_disponibles = Ciclo.objects.filter(
+    # Obtener TODOS los ciclos donde el alumno tiene matrículas O que tienen secciones activas
+    ciclos_con_matriculas = Ciclo.objects.filter(
         secciones__matriculas__alumno=alumno,
         secciones__matriculas__is_active=True
-    ).distinct().order_by('-nombre')
+    ).distinct()
+
+    # Obtener ciclos con matrícula abierta (donde puede matricularse)
+    ciclos_abiertos = Ciclo.objects.filter(matricula_abierta=True).distinct()
+
+    # Combinar ambos conjuntos y ordenar
+    ciclos_disponibles = (ciclos_con_matriculas | ciclos_abiertos).distinct().order_by('-nombre')
 
     # Obtener el ciclo seleccionado (desde query param o el más reciente)
     ciclo_id = request.GET.get('ciclo_id')
@@ -545,11 +551,17 @@ def alumno_mis_cursos(request):
             'notas_completas': resultado['notas_completas'],
         })
 
+    # Verificar si puede matricularse en el ciclo seleccionado
+    puede_matricularse = False
+    if ciclo_seleccionado and ciclo_seleccionado.matricula_abierta:
+        puede_matricularse = True
+
     context = {
         'ciclo_activo': ciclo_seleccionado,  # Mantener nombre para compatibilidad con template
         'ciclos_disponibles': ciclos_disponibles,
         'ciclo_seleccionado': ciclo_seleccionado,
         'cursos_data': cursos_data,
+        'puede_matricularse': puede_matricularse,
     }
     return render(request, 'alumno/mis_cursos.html', context)
 

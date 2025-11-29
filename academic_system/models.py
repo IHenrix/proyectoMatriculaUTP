@@ -275,14 +275,6 @@ class Ciclo(models.Model):
             if self.fecha_inicio_matricula > self.fecha_fin_matricula:
                 raise ValidationError('La fecha de inicio de matrícula debe ser anterior a la fecha de fin')
 
-        # Validar que las fechas de matrícula estén dentro del rango del ciclo
-        if all([self.fecha_inicio_ciclo, self.fecha_fin_ciclo,
-                self.fecha_inicio_matricula, self.fecha_fin_matricula]):
-            if self.fecha_inicio_matricula < self.fecha_inicio_ciclo:
-                raise ValidationError('La fecha de inicio de matrícula debe estar dentro del período del ciclo')
-            if self.fecha_fin_matricula > self.fecha_fin_ciclo:
-                raise ValidationError('La fecha de fin de matrícula debe estar dentro del período del ciclo')
-
 
 class Seccion(models.Model):
     """
