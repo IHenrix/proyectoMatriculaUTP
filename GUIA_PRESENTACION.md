@@ -388,20 +388,13 @@ def matricularse(request, seccion_id):
 1. **Ver Secciones Disponibles:**
    - Ir a "Matricularse" o "Buscar Secciones"
    - Mostrar tabla con secciones disponibles
-   - **Señalar:**
-     - Vacantes disponibles (ej: 25/30)
-     - Alertas de pocas vacantes (ícono naranja si ≤5)
-     - Última vacante (ícono rojo si = 1)
-
-2. **Antes de Matricularse - Anotar vacantes:**
-   > "Vean que esta sección tiene 25 vacantes disponibles de 30 totales. Voy a matricularme."
-
-3. **Matricularse:**
+   
+2. **Matricularse:**
    - Click en "Matricularme" en una sección
    - Esperar confirmación
    - **IMPORTANTE:** Mostrar que las vacantes cambiaron automáticamente
 
-4. **Después de Matricularse:**
+3. **Después de Matricularse:**
    > "Ahora tiene 24 vacantes disponibles. ¿Qué pasó? El **Observer Pattern** actualizó automáticamente las vacantes cuando me matriculé."
 
 **Qué decir (CLAVE):**
