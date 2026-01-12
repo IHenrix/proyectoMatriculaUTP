@@ -9,6 +9,11 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import Usuario, Curso, Ciclo, Seccion, ComponenteEvaluacion, Matricula, Nota
 
+# Personaliza los textos del panel de administración
+admin.site.site_header = "Panel de Matrículas UTP"
+admin.site.site_title = "Panel de Matrículas UTP"
+admin.site.index_title = "Administración del sistema"
+
 
 @admin.register(Usuario)
 class UsuarioAdmin(BaseUserAdmin):
