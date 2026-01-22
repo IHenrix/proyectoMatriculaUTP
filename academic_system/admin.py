@@ -10,8 +10,8 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import Usuario, Curso, Ciclo, Seccion, ComponenteEvaluacion, Matricula, Nota
 
 # Personaliza los textos del panel de administración
-admin.site.site_header = "Panel de Matrículas UTP"
-admin.site.site_title = "Panel de Matrículas UTP"
+admin.site.site_header = "Panel de Matrículas SENATI"
+admin.site.site_title = "Panel de Matrículas SENATI"
 admin.site.index_title = "Administración del sistema"
 
 

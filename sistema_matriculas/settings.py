@@ -155,8 +155,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CUSTOM SETTINGS - UNIVERSITY CONFIGURATION
 # ==============================================================================
 
-UNIVERSITY_NAME = config('UNIVERSITY_NAME', default='Universidad Tecnológica')
-UNIVERSITY_SHORT_NAME = config('UNIVERSITY_SHORT_NAME', default='UTECH')
+UNIVERSITY_NAME = config('UNIVERSITY_NAME', default='Servicio Nacional de Adiestramiento en Trabajo Industrial')
+UNIVERSITY_SHORT_NAME = config('UNIVERSITY_SHORT_NAME', default='SENATI')
 
 
 # ==============================================================================

@@ -116,8 +116,8 @@ class ConfiguracionSistema:
         self.prefijo_codigo_seccion = 'SEC'
 
         # Información de la universidad
-        self.nombre_universidad = 'Universidad Tecnológica del Perú'
-        self.nombre_corto_universidad = 'UTP'
+        self.nombre_universidad = 'Servicio Nacional de Adiestramiento en Trabajo Industrial'
+        self.nombre_corto_universidad = 'SENATI'
 
     def es_nota_aprobatoria(self, nota):
         """

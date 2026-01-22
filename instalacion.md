@@ -1,4 +1,4 @@
-# Guía de Instalación - Sistema de Matrículas UTP
+# Guía de Instalación - Sistema de Matrículas SENATI
 
 ## 1. Requisitos Previos
 
@@ -27,8 +27,8 @@ DB_PASSWORD=tu_password_mysql
 DB_HOST=localhost
 DB_PORT=3306
 
-UNIVERSITY_NAME=Universidad Tecnológica del Perú
-UNIVERSITY_SHORT_NAME=UTP
+UNIVERSITY_NAME=Servicio Nacional de Adiestramiento en Trabajo Industrial
+UNIVERSITY_SHORT_NAME=SENATI
 ```
 
 Cambiar `tu_password_mysql` por tu contraseña de MySQL.

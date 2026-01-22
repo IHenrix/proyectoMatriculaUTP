@@ -1,39 +1,17 @@
-# Sistema de Matrculas y Notas - UTP
+# Sistema de Matrículas y Notas - SENATI
 
+Sistema académico completo para la gestión de matrículas, notas y reportes académicos del Servicio Nacional de Adiestramiento en Trabajo Industrial.
 
-
-
-
-Sistema acadmico completo para la gestin de matrculas, notas y reportes acadmicos de la Universidad Tecnolgica del Per.
-
-
-
-
-
-> Nota de correccin (estado actual del cdigo):
-
+> Nota de corrección (estado actual del código):
 
 > Patrones implementados y presentes en el repositorio:
 
-
 > - Creacionales: Factory, Builder, Singleton, Prototype, Abstract Factory
-
 
 > - Estructurales: Facade, Decorator, Proxy, Adapter, Composite, Bridge
 
-
 > - Comportamiento: Strategy, Command, Observer, State, Memento
-
 
 > - GRASP: Controller, Information Expert, Creator, Low Coupling, High Cohesion, Pure Fabrication, Polymorphism, Protected Variations
 
-
-> - Antipatrones: ejemplo de God Object (solo demostrativo, no usado en ejecucin)
-
-
-
-
-
-
-
-
+> - Antipatrones: ejemplo de God Object (solo demostrativo, no usado en ejecución)
