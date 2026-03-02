@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from academic_system.models import Curso, Ciclo, Seccion, ComponenteEvaluacion, Matricula, Nota
-from academic_system.services import UsuarioService
+from academic_system.services import UsuarioService, CuotaService
 from datetime import date, time
 from decimal import Decimal
 import random
@@ -483,6 +483,30 @@ class Command(BaseCommand):
             self._registrar_notas(mat, notas)
             self.stdout.write(self.style.SUCCESS(f'[OK] Notas Joel - {sec.curso.nombre}: {notas}'))
 
+        # Ricardo (enrique) - 4 cursos en 2025-2 (con 1 desaprobado)
+        matriculas_notas_ricardo = [
+            ('16311', [9, 8, 7, 12, 8]),    # Diseño patrones: PC1,PC2,PC3,PA,EXFN → DESAPROBADO
+            ('28531', [13, 14, 12, 15]),     # Taller web: APF1,APF2,APF3,PROY → APROBADO
+            ('16306', [12, 13, 11, 14]),     # Algoritmos: PC1,PC2,PC3,TF → APROBADO
+            ('16308', [14, 12, 13, 15]),     # BD II: PC1,PC2,PC3,TF → APROBADO
+        ]
+
+        for codigo_sec, notas in matriculas_notas_ricardo:
+            sec = secciones_2025_2[codigo_sec]
+            mat, created = self._crear_matricula_directa(enrique, sec)
+            if created:
+                self.stdout.write(self.style.SUCCESS(f'[OK] Ricardo matriculado en {sec.curso.nombre}'))
+            self._registrar_notas(mat, notas)
+            self.stdout.write(self.style.SUCCESS(f'[OK] Notas Ricardo - {sec.curso.nombre}: {notas}'))
+
+        # ========================================
+        # CUOTAS - CICLO 2025-2 (HISTÓRICO - PAGADAS)
+        # ========================================
+        for alumno_cuota in [alumnos[2], alumnos[3], enrique]:  # Angel, Joel, Ricardo
+            CuotaService.generar_cuotas(alumno_cuota, ciclo_2025_2)
+            CuotaService.marcar_pagadas(alumno_cuota, ciclo_2025_2)
+            self.stdout.write(self.style.SUCCESS(f'[OK] Cuotas 2025-2 PAGADAS: {alumno_cuota.get_full_name()}'))
+
         # ========================================
         # SECCIONES - CICLO VERANO 2026 (VIRTUAL)
         # ========================================
@@ -546,6 +570,14 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f'[OK] {nombre_display} matriculado en {sec_teo.curso.nombre}'))
             self._registrar_notas(mat_teo, notas_teo)
             self.stdout.write(self.style.SUCCESS(f'[OK] Notas {nombre_display} - Teoría en computación: {notas_teo}'))
+
+        # ========================================
+        # CUOTAS - CICLO VERANO 2026 (HISTÓRICO - PAGADAS)
+        # ========================================
+        for usuario, _, _ in alumnos_verano:
+            CuotaService.generar_cuotas(usuario, ciclo_verano)
+            CuotaService.marcar_pagadas(usuario, ciclo_verano)
+            self.stdout.write(self.style.SUCCESS(f'[OK] Cuotas VERANO 2026 PAGADAS: {usuario.get_full_name()}'))
 
         # ========================================
         # CICLO 2026-1 (ACTIVO - EN CURSO)
@@ -613,6 +645,13 @@ class Command(BaseCommand):
                     ))
 
         # ========================================
+        # CUOTAS - CICLO 2026-1 (ACTIVO - PENDIENTES)
+        # ========================================
+        for alumno_cuota in alumnos_2026_1:  # Juan, Kelvin, Angel, Joel
+            CuotaService.generar_cuotas(alumno_cuota, ciclo_2026_1)
+            self.stdout.write(self.style.SUCCESS(f'[OK] Cuotas 2026-1 PENDIENTES: {alumno_cuota.get_full_name()}'))
+
+        # ========================================
         # ALUMNOS EXTRA - SOLO ANÁLISIS Y DISEÑO (2026-1)
         # Para que el docente Osores vea alumnos en su sección
         # ========================================
@@ -678,15 +717,18 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('  Alumno Enrique:   75911772  / Marco1415@  [demo VERANO 2026]'))
         self.stdout.write(self.style.SUCCESS('\n--- CICLO 2025-2 (HISTÓRICO/TERMINADO) ---'))
         self.stdout.write(self.style.SUCCESS('  Angel y Joel: 4 cursos c/u - TODOS APROBADOS'))
+        self.stdout.write(self.style.SUCCESS('  Ricardo: 4 cursos - 1 DESAPROBADO (Diseño de patrones)'))
         self.stdout.write(self.style.SUCCESS('  Juan y Kelvin: sin matrícula en este ciclo'))
+        self.stdout.write(self.style.SUCCESS('  Cuotas 2025-2: Angel, Joel, Ricardo → PAGADAS (5 cuotas)'))
         self.stdout.write(self.style.SUCCESS('\n--- CICLO VERANO 2026 (HISTÓRICO/TERMINADO) ---'))
         self.stdout.write(self.style.SUCCESS('  Matrícula:  06/01/2026 - 15/01/2026'))
         self.stdout.write(self.style.SUCCESS('  Ciclo:      16/01/2026 - 06/03/2026'))
         self.stdout.write(self.style.SUCCESS('  Cursos:     Desarrollo de software (17804)'))
         self.stdout.write(self.style.SUCCESS('              Teoría en computación (17805)'))
         self.stdout.write(self.style.SUCCESS('  Docente:    Luis Rolando Garcia Moran'))
-        self.stdout.write(self.style.SUCCESS('  Alumnos:    Juan, Kelvin, Angel, Joel + Enrique (demo)'))
+        self.stdout.write(self.style.SUCCESS('  Alumnos:    Juan, Kelvin, Angel, Joel + Ricardo (demo)'))
         self.stdout.write(self.style.SUCCESS('  Estado:     TODOS APROBADOS'))
+        self.stdout.write(self.style.SUCCESS('  Cuotas VERANO: todos → PAGADAS (2 cuotas)'))
         self.stdout.write(self.style.SUCCESS('\n--- CICLO 2026-1 (ACTIVO - EN CURSO) ---'))
         self.stdout.write(self.style.SUCCESS('  Matrícula:  16/02/2026 - 05/03/2026'))
         self.stdout.write(self.style.SUCCESS('  Ciclo:      28/03/2026 - 26/07/2026'))
@@ -698,6 +740,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('              Diseño de productos y servicios (48398) - Osores Granda'))
         self.stdout.write(self.style.SUCCESS('  Alumnos generales (18001-18004+48398): Juan, Kelvin, Angel, Joel'))
         self.stdout.write(self.style.SUCCESS('  Alumnos Análisis (18005): David, Jean Brandon, Yuri Reiner, Abel'))
-        self.stdout.write(self.style.SUCCESS('  Enrique:    NO matriculado (demo en vivo de matricula)'))
+        self.stdout.write(self.style.SUCCESS('  Ricardo:    NO matriculado en 2026-1 (demo en vivo de matrícula)'))
+        self.stdout.write(self.style.SUCCESS('  Cuotas 2026-1: Juan, Kelvin, Angel, Joel → PENDIENTES (5 cuotas)'))
         self.stdout.write(self.style.SUCCESS('\n  [DEMO MATRÍCULA] Login: 75911772 / Marco1415@'))
         self.stdout.write(self.style.SUCCESS('\nAccede a: http://localhost:8000'))

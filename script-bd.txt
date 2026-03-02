@@ -1,0 +1,13 @@
+DROP DATABASE IF EXISTS sistema_matriculas;
+CREATE DATABASE sistema_matriculas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+Si eliminas y recreas la BD (base de datos vacía):
+
+python manage.py migrate && python manage.py crear_datos_prueba
+
+Si solo quieres limpiar y recargar sin tocar la BD (tablas ya existen):
+
+python manage.py flush --no-input && python manage.py crear_datos_prueba
+
+python manage.py runserver
+

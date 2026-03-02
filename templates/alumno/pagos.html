@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Pagos - {{ UNIVERSITY_NAME }}{% endblock %}
+
+{% block header %}
+<h1 class="text-2xl font-bold tracking-tight text-gray-900">
+    <i class="fas fa-credit-card mr-2 text-primary-600"></i>Mis Pagos
+</h1>
+<p class="mt-1 text-sm text-gray-500">Cuotas mensuales por ciclo académico</p>
+{% endblock %}
+
+{% block content %}
+
+<!-- Resumen -->
+<div class="mb-8">
+    <div class="bg-white rounded-xl shadow-sm border {% if resumen.cantidad_pendiente %}border-red-300{% else %}border-gray-100{% endif %} p-5 flex items-center gap-4 max-w-sm">
+        <div class="h-12 w-12 rounded-full {% if resumen.cantidad_pendiente %}bg-red-100{% else %}bg-gray-100{% endif %} flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-exclamation-circle {% if resumen.cantidad_pendiente %}text-red-600{% else %}text-gray-400{% endif %} text-xl"></i>
+        </div>
+        <div>
+            <p class="text-xs text-gray-500 uppercase tracking-wide">Deuda pendiente</p>
+            <p class="text-2xl font-bold {% if resumen.cantidad_pendiente %}text-red-600{% else %}text-gray-900{% endif %}">S/ {{ resumen.total_pendiente }}</p>
+            <p class="text-xs {% if resumen.cantidad_pendiente %}text-red-400{% else %}text-gray-400{% endif %}">{{ resumen.cantidad_pendiente }} cuota{{ resumen.cantidad_pendiente|pluralize }}</p>
+        </div>
+    </div>
+</div>
+
+{% if cuotas_por_ciclo %}
+    {% for ciclo_nombre, data in cuotas_por_ciclo.items %}
+    <div class="mb-10">
+
+        <!-- Encabezado ciclo -->
+        <div class="flex items-center gap-3 mb-4 flex-wrap">
+            <i class="fas fa-calendar-alt text-primary-600"></i>
+            <h2 class="text-lg font-semibold text-gray-700">Ciclo {{ ciclo_nombre }}</h2>
+
+            {% if data.ciclo.ciclo_terminado %}
+                <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Finalizado</span>
+            {% elif data.ciclo.matricula_abierta %}
+                <span class="text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full font-medium">En curso</span>
+            {% endif %}
+
+            {% if data.cuotas_pendientes %}
+                <span class="ml-auto inline-flex items-center gap-1.5 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow">
+                    <i class="fas fa-exclamation-triangle text-xs"></i>
+                    {{ data.cuotas_pendientes }} cuota{{ data.cuotas_pendientes|pluralize }} por pagar
+                </span>
+            {% else %}
+                <span class="ml-auto inline-flex items-center gap-1.5 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
+                    <i class="fas fa-check text-xs"></i> Al día
+                </span>
+            {% endif %}
+        </div>
+
+        <div class="space-y-3">
+            {% for cuota in data.cuotas %}
+
+            {% if cuota.esta_pagado %}
+            <!-- CUOTA PAGADA -->
+            <div class="bg-white rounded-xl shadow-sm border-l-4 border-l-green-400 border border-gray-100 overflow-hidden">
+                <div class="flex items-center justify-between px-5 py-3">
+                    <div class="flex items-center gap-4">
+                        <div class="h-9 w-9 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                            <span class="text-sm font-bold text-green-600">{{ cuota.numero_cuota }}</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-700">
+                                Cuota {{ cuota.numero_cuota }}
+                                <span class="font-normal text-gray-400 ml-1">· vence {{ cuota.fecha_vencimiento|date:"d/m/Y" }}</span>
+                            </p>
+                            <p class="text-xs text-gray-300 font-mono">{{ cuota.codigo_pago }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <p class="text-base font-semibold text-gray-600">S/ {{ cuota.monto }}</p>
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                            <i class="fas fa-check"></i> Pagado
+                        </span>
+                    </div>
+                </div>
+                <div class="px-5 pb-2 border-t border-gray-50">
+                    <p class="text-xs text-gray-400 mt-1.5">
+                        <i class="fas fa-calendar-check mr-1 text-green-400"></i>
+                        Pagado el {{ cuota.fecha_pago|date:"d/m/Y" }} a las {{ cuota.fecha_pago|date:"H:i" }}
+                    </p>
+                </div>
+            </div>
+
+            {% else %}
+            <!-- CUOTA PENDIENTE -->
+            <div class="bg-white rounded-xl shadow border-l-4 border-l-red-500 border border-red-200 overflow-hidden">
+                <div class="flex items-center justify-between px-5 py-4">
+                    <div class="flex items-center gap-4">
+                        <div class="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                            <span class="text-sm font-bold text-red-600">{{ cuota.numero_cuota }}</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">
+                                Cuota {{ cuota.numero_cuota }}
+                                <span class="font-normal text-gray-500 ml-1">· vence {{ cuota.fecha_vencimiento|date:"d/m/Y" }}</span>
+                            </p>
+                            <p class="text-xs text-gray-400 font-mono">{{ cuota.codigo_pago }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <p class="text-xl font-bold text-red-700">S/ {{ cuota.monto }}</p>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-red-600 text-white shadow-sm">
+                            <i class="fas fa-exclamation-circle"></i> PENDIENTE
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Canales de pago -->
+                <div class="px-5 pb-4 pt-3 border-t border-red-200 bg-red-50">
+                    <p class="text-xs font-bold text-red-800 mb-2 flex items-center gap-2">
+                        <i class="fas fa-university"></i>
+                        Paga en cualquier banco con el código:
+                        <span class="font-mono bg-white border border-red-300 text-red-700 px-2 py-0.5 rounded">{{ cuota.codigo_pago }}</span>
+                    </p>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <div class="bg-white rounded-lg border border-red-200 px-3 py-2 text-center">
+                            <p class="text-xs font-bold text-gray-700">BCP</p>
+                            <p class="text-xs text-gray-500 font-mono">{{ cuota.codigo_pago }}</p>
+                        </div>
+                        <div class="bg-white rounded-lg border border-red-200 px-3 py-2 text-center">
+                            <p class="text-xs font-bold text-gray-700">BBVA</p>
+                            <p class="text-xs text-gray-500 font-mono">{{ cuota.codigo_pago }}</p>
+                        </div>
+                        <div class="bg-white rounded-lg border border-red-200 px-3 py-2 text-center">
+                            <p class="text-xs font-bold text-gray-700">Interbank</p>
+                            <p class="text-xs text-gray-500 font-mono">{{ cuota.codigo_pago }}</p>
+                        </div>
+                        <div class="bg-white rounded-lg border border-red-200 px-3 py-2 text-center">
+                            <p class="text-xs font-bold text-gray-700">Bco. Nación</p>
+                            <p class="text-xs text-gray-500 font-mono">{{ cuota.codigo_pago }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+{% else %}
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+    <i class="fas fa-credit-card text-5xl text-gray-200 mb-4"></i>
+    <p class="text-gray-500 text-lg">No tienes cuotas registradas.</p>
+    <p class="text-gray-400 text-sm mt-1">Las cuotas aparecerán aquí una vez que te matricules en un ciclo.</p>
+</div>
+{% endif %}
+
+{% endblock %}

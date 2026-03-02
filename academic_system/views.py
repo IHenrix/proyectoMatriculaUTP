@@ -14,8 +14,8 @@ from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
 from .decorators import admin_required, profesor_required, alumno_required
-from .models import Usuario, Curso, Ciclo, Seccion, ComponenteEvaluacion, Matricula, Nota
-from .services import UsuarioService, MatriculaService, NotaService, ReporteService
+from .models import Usuario, Curso, Ciclo, Seccion, ComponenteEvaluacion, Matricula, Nota, Cuota
+from .services import UsuarioService, MatriculaService, NotaService, ReporteService, CuotaService
 from academic_system.services.reporte_service import ResponseAdapter
 from academic_system.services.vacante_proxy import SeccionVacanteProxy
 
@@ -461,6 +461,8 @@ def alumno_matricular_seccion(request, seccion_id):
         try:
             alumno = request.user
             MatriculaService.matricular_alumno(alumno.id, seccion_id)
+            seccion = Seccion.objects.get(id=seccion_id)
+            CuotaService.recalcular_cuotas(alumno, seccion.ciclo)
             messages.success(request, '¡Matrícula exitosa!')
 
         except Exception as e:
@@ -482,13 +484,18 @@ def alumno_desmatricular(request, matricula_id):
                 messages.error(request, 'El periodo de matrícula ha finalizado. No puedes retirarte del curso.')
                 return redirect('alumno_matricula')
 
-            # Desactivar la matr??cula
+            ciclo = matricula.seccion.ciclo
+
+            # Desactivar la matrícula
             matricula.is_active = False
             matricula.save(update_fields=["is_active"])
 
             # Actualizar vacantes con Proxy (protege contadores)
             seccion = matricula.seccion
             SeccionVacanteProxy(seccion).liberar_vacante()
+
+            # Recalcular cuotas con los créditos actualizados
+            CuotaService.recalcular_cuotas(alumno, ciclo)
 
             messages.success(request, f'Te has retirado exitosamente del curso: {matricula.seccion.curso.nombre}')
 
@@ -553,17 +560,13 @@ def alumno_mis_cursos(request):
             'notas_completas': resultado['notas_completas'],
         })
 
-    # Verificar si puede matricularse en el ciclo seleccionado
-    puede_matricularse = False
-    if ciclo_seleccionado and ciclo_seleccionado.matricula_abierta:
-        puede_matricularse = True
-
     context = {
         'ciclo_activo': ciclo_seleccionado,  # Mantener nombre para compatibilidad con template
         'ciclos_disponibles': ciclos_disponibles,
         'ciclo_seleccionado': ciclo_seleccionado,
         'cursos_data': cursos_data,
-        'puede_matricularse': puede_matricularse,
+        # ciclo_acepta_matricula: si el ciclo VISUALIZADO acepta matrícula (no afecta al nav)
+        'ciclo_acepta_matricula': bool(ciclo_seleccionado and ciclo_seleccionado.matricula_abierta),
     }
     return render(request, 'alumno/mis_cursos.html', context)
 
@@ -648,3 +651,34 @@ def api_estadisticas_seccion(request, seccion_id):
     }
 
     return JsonResponse(data)
+
+
+# ==============================================================================
+# VISTAS DE CUOTAS (ALUMNO)
+# ==============================================================================
+
+@alumno_required
+def alumno_pagos(request):
+    """
+    Vista que muestra las cuotas mensuales del alumno por ciclo.
+    Las cuotas PENDIENTE muestran los canales de pago disponibles.
+    """
+    alumno  = request.user
+    cuotas  = CuotaService.obtener_cuotas_alumno(alumno)
+    resumen = CuotaService.resumen(alumno)
+
+    # Agrupar por ciclo (preservando orden: más reciente primero por fecha_inicio_ciclo)
+    cuotas_por_ciclo = {}
+    for cuota in cuotas:
+        nombre = cuota.ciclo.nombre
+        if nombre not in cuotas_por_ciclo:
+            cuotas_por_ciclo[nombre] = {'ciclo': cuota.ciclo, 'cuotas': [], 'cuotas_pendientes': 0}
+        cuotas_por_ciclo[nombre]['cuotas'].append(cuota)
+        if not cuota.esta_pagado:
+            cuotas_por_ciclo[nombre]['cuotas_pendientes'] += 1
+
+    context = {
+        'cuotas_por_ciclo': cuotas_por_ciclo,
+        'resumen':          resumen,
+    }
+    return render(request, 'alumno/pagos.html', context)

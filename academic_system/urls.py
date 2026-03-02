@@ -32,4 +32,7 @@ urlpatterns = [
 
     # API para gráficos
     path('api/estadisticas/<int:seccion_id>/', views.api_estadisticas_seccion, name='api_estadisticas_seccion'),
+
+    # Cuotas / Pagos (Alumno)
+    path('alumno/pagos/', views.alumno_pagos, name='alumno_pagos'),
 ]

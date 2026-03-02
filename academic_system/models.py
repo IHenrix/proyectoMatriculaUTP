@@ -1179,3 +1179,51 @@ class Nota(models.Model):
 
             raise ValidationError('El componente no pertenece al curso de la matrícula')
 
+
+
+
+class Cuota(models.Model):
+
+    """
+    Modelo que representa una cuota mensual de pago de un ciclo académico.
+
+    Patrones aplicados:
+    - Strategy Pattern: el cálculo del monto se delega a CuotaService
+    - Information Expert: Cuota conoce su estado, monto y código de pago
+    """
+
+    ESTADO_CHOICES = (
+        ('PENDIENTE', 'Pendiente'),
+        ('PAGADO',    'Pagado'),
+    )
+
+    alumno            = models.ForeignKey(
+                            Usuario,
+                            on_delete=models.CASCADE,
+                            limit_choices_to={'rol': 'alumno'},
+                            related_name='cuotas'
+                        )
+    ciclo             = models.ForeignKey(Ciclo, on_delete=models.CASCADE, related_name='cuotas')
+    numero_cuota      = models.PositiveSmallIntegerField()
+    fecha_vencimiento = models.DateField()
+    monto             = models.DecimalField(max_digits=8, decimal_places=2)
+    estado            = models.CharField(max_length=20, choices=ESTADO_CHOICES, default='PENDIENTE')
+    fecha_pago        = models.DateTimeField(null=True, blank=True)
+    codigo_pago       = models.CharField(max_length=40, unique=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'cuota'
+        verbose_name = 'Cuota'
+        verbose_name_plural = 'Cuotas'
+        unique_together = ['alumno', 'ciclo', 'numero_cuota']
+        ordering = ['ciclo__nombre', 'numero_cuota']
+
+    def __str__(self):
+        return f"{self.codigo_pago} — Cuota {self.numero_cuota} ({self.estado})"
+
+    @property
+    def esta_pagado(self):
+        return self.estado == 'PAGADO'

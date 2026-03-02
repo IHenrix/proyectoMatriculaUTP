@@ -84,6 +84,10 @@
                                     class="text-white hover:bg-primary-700 px-3 py-2 rounded-md text-sm font-medium transition">
                                     <i class="fas fa-book mr-1"></i> Mis Cursos
                                 </a>
+                                <a href="{% url 'alumno_pagos' %}"
+                                    class="text-white hover:bg-primary-700 px-3 py-2 rounded-md text-sm font-medium transition">
+                                    <i class="fas fa-credit-card mr-1"></i> Mis Pagos
+                                </a>
                                 {% endif %}
 
                                 {% if user.rol == 'profesor' %}
