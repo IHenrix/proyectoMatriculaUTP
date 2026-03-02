@@ -277,7 +277,7 @@ class ReporteBuilder:
 
         # Estilos
         header_font = Font(bold=True, color="FFFFFF", size=12)
-        header_fill = PatternFill(start_color="DC143C", end_color="DC143C", fill_type="solid")
+        header_fill = PatternFill(start_color="0047BA", end_color="0047BA", fill_type="solid")
         header_alignment = Alignment(horizontal="center", vertical="center")
 
         # Título
@@ -363,7 +363,7 @@ class ReporteBuilder:
 
         # Estilos
         header_font = Font(bold=True, color="FFFFFF", size=11)
-        header_fill = PatternFill(start_color="DC143C", end_color="DC143C", fill_type="solid")
+        header_fill = PatternFill(start_color="0047BA", end_color="0047BA", fill_type="solid")
         header_alignment = Alignment(horizontal="center", vertical="center")
 
         # Título
@@ -468,7 +468,7 @@ class ReporteBuilder:
             'CustomTitle',
             parent=styles['Heading1'],
             fontSize=16,
-            textColor=colors.HexColor('#DC143C'),
+            textColor=colors.HexColor('#0047BA'),
             alignment=TA_CENTER,
             spaceAfter=12
         )
@@ -496,7 +496,7 @@ class ReporteBuilder:
 
         table = Table(data, colWidths=[0.5 * inch, 1 * inch, 1.5 * inch, 1.5 * inch, 1.5 * inch])
         table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#DC143C')),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0047BA')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
@@ -545,7 +545,7 @@ class ReporteBuilder:
             'CustomTitle',
             parent=styles['Heading1'],
             fontSize=14,
-            textColor=colors.HexColor('#DC143C'),
+            textColor=colors.HexColor('#0047BA'),
             alignment=TA_CENTER,
             spaceAfter=10
         )
@@ -600,7 +600,7 @@ class ReporteBuilder:
 
         table = Table(data, colWidths=col_widths)
         table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#DC143C')),
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0047BA')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),

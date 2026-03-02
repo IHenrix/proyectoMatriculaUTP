@@ -8,7 +8,7 @@ Este documento contiene las credenciales de acceso para probar el sistema de mat
 
 | Nombre | DNI | Contraseña |
 |--------|-----|------------|
-| **Edson Aldagir Ascencio Arcos** | `75933651` | `Marco1415@` |
+| **Edson Aldahir Asencio Arcos** | `75933651` | `Marco1415@` |
 
 ---
 
